@@ -2,6 +2,7 @@
 #define ROOTTOOLS_H
 
 #include <TCanvas.h>
+#include <TFile.h>
 
 namespace RootTools {
 	// Export Images
@@ -17,6 +18,8 @@ namespace RootTools {
 	void ExportEPS(TCanvas * can);
 	void ExportPDF(TCanvas * can);
 	void ExportImages(TCanvas * can);
+
+	void SaveAndClose(TCanvas * can, TFile * f, Bool_t export_images = kTRUE);
 
 	// Progress Bar
 	extern Int_t gBarPointWidth;
