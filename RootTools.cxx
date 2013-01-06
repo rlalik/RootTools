@@ -68,12 +68,12 @@ void RootTools::ProgressBar(int num, int max) {
 		newBar = kFALSE;
 	}
 	
-	if (/*num != 0  and*/ num % bp == 0)
+	if (num != 0  and (num+1) % bp == 0)
 		std::cout << "." << std::flush;
 	
 	if ((num != 0  and (num+1) % (bp*bw) == 0) or (num == (max-1))) {
 		Float_t num_percent = 100.0*num/(max-1);
-		std::cout << " " << num << " (" << num_percent << "%) " << "\n" << std::flush;
+		std::cout << " " << num+1 << " (" << num_percent << "%) " << "\n" << std::flush;
 		newBar = kTRUE;
 	}
 }

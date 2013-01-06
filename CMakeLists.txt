@@ -61,7 +61,7 @@ set (root_cint_cppflags -I${root_INCLUDES} -I${go4_INCLUDES}) # -I${roclib_INCLU
 set (rlibmap_executable ${root_libmap})
 set (rlibmap_cppflags -I${root_INCLUDES} -I${go4_INCLUDES}) # -I${roclib_INCLUDES}
 
-set(library_SRCS ${CMAKE_CURRENT_SOURCE_DIR}/RootTools.cxx) # ${CMAKE_CURRENT_SOURCE_DIR}/
+set(library_SRCS ${CMAKE_CURRENT_SOURCE_DIR}/RootTools.cxx langaus.C) # ${CMAKE_CURRENT_SOURCE_DIR}/
 set(library_HDRS ${CMAKE_CURRENT_SOURCE_DIR}/RootTools.h) #
 
 set(libraryDict_TRG ${PRONAME}Dict.cxx ${PRONAME}Dict.h)
