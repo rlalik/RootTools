@@ -26,6 +26,13 @@ namespace RootTools {
 	extern Int_t gBarPointWidth;
 	extern Int_t gBarWidth;
 	void ProgressBar(int num, int max);
+
+	// Pt and Momentum functions
+	Double_t MtY(Double_t * yP, Double_t * par);
+	Double_t Momentum(Double_t * yP, Double_t * par);
+
+	void DrawAngleLine(Double_t angle, Double_t xdraw=-10, Double_t ydraw=-10, Double_t angledraw=0);
+	void DrawMomentumLine(Double_t mom, Double_t xdraw=-10, Double_t ydraw=-10, Double_t angledraw=0);
 };
 
 Double_t langaufun(Double_t *x, Double_t *par);
