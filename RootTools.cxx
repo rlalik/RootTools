@@ -302,7 +302,8 @@ Float_t RootTools::calcTotalError(TH1 * h, Int_t bin_l, Int_t bin_u) {
 
 TNamed * RootTools::GetObjectFromFile(TFile * f, const TString & name, const TString & suffix) {
 	TNamed * dest = nullptr;
-	f->GetObject(name, dest);
+
+	dest = (TNamed*)f->Get(name);
 	if (!dest) {
 		std::cerr << "Error taking " << name.Data() << " from file " << "..." << ". Exiting..." << std::endl;
 		exit(EXIT_FAILURE);
