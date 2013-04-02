@@ -250,7 +250,44 @@ void RootTools::AutoScale(TH1 * hdraw, TH1 * href) {
 	Float_t irefmin = href->GetMinimum();
 
 	Float_t scalemax = irefmax > idrawmax ? irefmax : idrawmax;
-	Float_t scalemin = irefmin > idrawmin ? irefmin : idrawmin;
+	Float_t scalemin = irefmin < idrawmin ? irefmin : idrawmin;
+
+	Float_t delta = scalemax - scalemin;
+	scalemax += delta/10.;
+	scalemin -= delta/10.;
+// 	scalemax = scalemax < 0. ? scalemax * 1.1 : scalemax * 0.9;
+// 	scalemin = scalemin < 0. ? scalemin * 1.1 : scalemin * 0.9;
+	hdraw->GetYaxis()->SetRangeUser(scalemin, scalemax);
+}
+
+void RootTools::AutoScale(TH1 * hdraw, TH1 * href1, TH1 * href2) {
+	if (!href1 and !href2) {
+		return;
+	}
+
+	if (!href1 and href2) {
+		RootTools::AutoScale(hdraw, href2);
+		return;
+	}
+
+	if (href1 and !href2) {
+		RootTools::AutoScale(hdraw, href1);
+		return;
+	}
+
+	Float_t idrawmax = hdraw->GetMaximum();
+	Float_t iref1max = href1->GetMaximum();
+	Float_t iref2max = href2->GetMaximum();
+
+	Float_t idrawmin = hdraw->GetMinimum();
+	Float_t iref1min = href1->GetMinimum();
+	Float_t iref2min = href2->GetMinimum();
+
+	Float_t irefmax = iref1max > iref2max ? iref1max : iref2max;
+	Float_t irefmin = iref1min < iref2min ? iref1min : iref2min;
+
+	Float_t scalemax = irefmax > idrawmax ? irefmax : idrawmax;
+	Float_t scalemin = irefmin < idrawmin ? irefmin : idrawmin;
 
 	Float_t delta = scalemax - scalemin;
 	scalemax += delta/10.;

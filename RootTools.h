@@ -47,6 +47,8 @@ namespace RootTools {
 	void AutoScale(TH1 * hdraw, TH1 * href);
 	void AutoScaleF(TH1 * hdraw, TH1 * href);
 
+	void AutoScale(TH1 * hdraw, TH1 * href1, TH1 * href2);
+
 	Float_t calcTotalError(TH1 * h, Int_t bin_l, Int_t bin_u);
 
 	TNamed * GetObjectFromFile(TFile * f, const TString & hname, const TString & suffix = "");
