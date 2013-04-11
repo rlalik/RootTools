@@ -24,7 +24,7 @@ link_directories(${root_LIBRARIES_DIR})
 set(library_SRCS ${CMAKE_CURRENT_SOURCE_DIR}/RootTools.cxx langaus.C) # ${CMAKE_CURRENT_SOURCE_DIR}/
 set(library_HDRS ${CMAKE_CURRENT_SOURCE_DIR}/RootTools.h) #
 
-set(library_DICT ${CMAKE_CURRENT_SOURCE_DIR}/${PRONAME}Dict.cxx)
+set(library_DICT ${CMAKE_CURRENT_BINARY_DIR}/${PRONAME}Dict.cxx)
 set(library_LINKDEF ${CMAKE_CURRENT_SOURCE_DIR}/LinkDef.h)
 
 ROOT_GENERATE_DICTIONARY(
