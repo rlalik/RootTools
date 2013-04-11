@@ -1,7 +1,7 @@
 #include "RootTools.h"
 
 #include <TError.h>
-#include <TImage.h>
+#include <TASImage.h>
 #include <TLatex.h>
 #include <TMath.h>
 
@@ -31,11 +31,10 @@ Int_t RootTools::gBarPointWidth = 50000;
 Int_t RootTools::gBarWidth = 20;
 
 void RootTools::ExportPNG(TCanvas * can, const TString & path) {
-	TImage * img = TImage::Create();
-	img->FromPad(can);
+	TASImage img;
+	img.FromPad(can);
 	TString filename = path + TString::Format("%s.png", can->GetName());
-	img->WriteImage(filename);
-	delete img;
+	img.WriteImage(filename);
 }
 
 void RootTools::ExportEPS(TCanvas * can, const TString & path) {
@@ -212,7 +211,6 @@ TPaletteAxis * RootTools::NicePalette(TH2 * h, Float_t ls, Float_t ts, Float_t t
 	return axis;
 }
 
-
 void RootTools::NicePad(TVirtualPad * pad, Float_t mT, Float_t mR, Float_t mB, Float_t mL) {
 // 	pad->Update();
 	pad->SetTopMargin(mT);
@@ -243,11 +241,11 @@ void RootTools::NiceHistogram(TH1 * h, Int_t ndivx, Int_t ndivy, Float_t xls, Fl
 }
 
 void RootTools::AutoScale(TH1 * hdraw, TH1 * href) {
-	Float_t idrawmax = hdraw->GetMaximum();
-	Float_t irefmax = href->GetMaximum();
+	Float_t idrawmax = hdraw->GetBinContent(hdraw->GetMaximumBin());
+	Float_t irefmax = href->GetBinContent(href->GetMaximumBin());
 
-	Float_t idrawmin = hdraw->GetMinimum();
-	Float_t irefmin = href->GetMinimum();
+	Float_t idrawmin = hdraw->GetBinContent(hdraw->GetMinimumBin());
+	Float_t irefmin = href->GetBinContent(href->GetMinimumBin());
 
 	Float_t scalemax = irefmax > idrawmax ? irefmax : idrawmax;
 	Float_t scalemin = irefmin < idrawmin ? irefmin : idrawmin;
@@ -275,13 +273,13 @@ void RootTools::AutoScale(TH1 * hdraw, TH1 * href1, TH1 * href2) {
 		return;
 	}
 
-	Float_t idrawmax = hdraw->GetMaximum();
-	Float_t iref1max = href1->GetMaximum();
-	Float_t iref2max = href2->GetMaximum();
+	Float_t idrawmax = hdraw->GetBinContent(hdraw->GetMaximumBin());
+	Float_t iref1max = href1->GetBinContent(href1->GetMaximumBin());
+	Float_t iref2max = href2->GetBinContent(href2->GetMaximumBin());
 
-	Float_t idrawmin = hdraw->GetMinimum();
-	Float_t iref1min = href1->GetMinimum();
-	Float_t iref2min = href2->GetMinimum();
+	Float_t idrawmin = hdraw->GetBinContent(hdraw->GetMinimumBin());
+	Float_t iref1min = href1->GetBinContent(href1->GetMinimumBin());
+	Float_t iref2min = href2->GetBinContent(href2->GetMinimumBin());
 
 	Float_t irefmax = iref1max > iref2max ? iref1max : iref2max;
 	Float_t irefmin = iref1min < iref2min ? iref1min : iref2min;
