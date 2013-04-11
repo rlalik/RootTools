@@ -32,7 +32,7 @@ ROOT_GENERATE_DICTIONARY(
 	"${library_DICT}" "${INCLUE_DIRECTORIES}"
 )
 
-add_library(${PRONAME} SHARED ${library_SRCS})
+add_library(${PRONAME} SHARED ${library_SRCS} ${library_DICT})
 
 string(REGEX REPLACE "/" "." ROOT_VERSION ${ROOTVERSION})
 
