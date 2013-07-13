@@ -36,7 +36,7 @@ add_library(${PRONAME} SHARED ${library_SRCS} ${library_DICT})
 
 string(REGEX REPLACE "/" "." ROOT_VERSION ${ROOTVERSION})
 
-target_link_libraries(${PRONAME} ${ROOT_LIBRARIES})
+target_link_libraries(${PRONAME} ${ROOT_LIBRARIES} ASImage)
 set_target_properties(${PRONAME} PROPERTIES
 	SOVERSION ${ROOT_VERSION}
 	PUBLIC_HEADER RootTools.h)

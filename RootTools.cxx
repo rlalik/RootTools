@@ -6,11 +6,13 @@
 #include <TMath.h>
 
 #include <TCanvas.h>
+#include <TColor.h>
 #include <TFile.h>
 #include <TF1.h>
 #include <TH1.h>
 #include <TH2.h>
 #include <TPaletteAxis.h>
+#include <TStyle.h>
 #include <TVirtualPad.h>
 
 #include <iostream>
@@ -18,6 +20,75 @@
 #define PR(x) std::cout << "++DEBUG: " << #x << " = |" << x << "| (" << __FILE__ << ", " << __LINE__ << ")\n";
 
 using namespace RootTools;
+
+void RootTools::def(RootTools::PadFormat & f)
+{
+	f.marginTop			= 0.1;
+	f.marginRight		= 0.1;
+	f.marginBottom		= 0.1;
+	f.marginLeft		= 0.1;
+}
+
+void RootTools::def(RootTools::GraphFormat & f)
+{
+	f.NdivX			= 505;
+	f.NdivY			= 505;
+	f.Xls			= 0.08;
+	f.Xlo			= 0.005;
+	f.Xts			= 0.08;
+	f.Xto			= 0.9;
+	f.Yls			= 0.08;
+	f.Ylo			= 0.005;
+	f.Yts			= 0.08;
+	f.Yto			= 0.55;
+	f.centerX		= kFALSE;
+	f.centerY		= kFALSE;
+	f.optX			= kTRUE;
+	f.optY			= kTRUE;
+}
+
+void RootTools::def(RootTools::PaintFormat & f)
+{
+	PadFormat pf;
+	def(pf);
+	f.marginTop			= pf.marginTop;
+	f.marginRight		= pf.marginRight;
+	f.marginBottom		= pf.marginBottom;
+	f.marginLeft		= pf.marginLeft;
+
+	GraphFormat gf;
+	def(gf);
+
+	f.NdivX			= gf.NdivX;
+	f.NdivY			= gf.NdivY;
+	f.Xls			= gf.Xls;
+	f.Xlo			= gf.Xlo;
+	f.Xts			= gf.Xts;
+	f.Xto			= gf.Xto;
+	f.Yls			= gf.Yls;
+	f.Ylo			= gf.Ylo;
+	f.Yts			= gf.Yts;
+	f.Yto			= gf.Yto;
+	f.centerX		= gf.centerX;
+	f.centerY		= gf.centerY;
+	f.optX			= gf.optX;
+	f.optY			= gf.optY;
+}
+
+PadFormat RootTools::fpad(PaintFormat f)
+{
+	return { f.marginTop, f.marginRight, f.marginBottom, f.marginLeft };
+}
+
+GraphFormat RootTools::fgraph(PaintFormat f)
+{
+	return {
+		f.NdivX, f.NdivY,
+		f.Xls, f.Xlo, f.Xts, f.Xto,
+		f.Yls, f.Ylo, f.Yts, f.Yto,
+		f.centerX, f.centerY, f.optX, f.optY
+	};
+}
 
 Bool_t RootTools::gHasImgExportEnabled = kTRUE;
 
@@ -197,6 +268,16 @@ void RootTools::DrawMomentumLine(Double_t mom, Double_t xdraw, Double_t ydraw, D
 	delete text;
 }
 
+void RootTools::DrawLine(Double_t x1, Double_t y1, Double_t x2, Double_t y2, Int_t color, Int_t width, Int_t style)
+{
+	TLine * line = new TLine;
+	line->SetLineColor(color);
+	line->SetLineWidth(width);
+	line->SetLineStyle(style);
+
+	line->DrawLine(x1, y1, x2, y2);
+}
+
 TPaletteAxis * RootTools::NicePalette(TH2 * h, Float_t ls, Float_t ts, Float_t to) {
 	gPad->Update();
 
@@ -211,7 +292,8 @@ TPaletteAxis * RootTools::NicePalette(TH2 * h, Float_t ls, Float_t ts, Float_t t
 	return axis;
 }
 
-void RootTools::NicePad(TVirtualPad * pad, Float_t mT, Float_t mR, Float_t mB, Float_t mL) {
+void RootTools::NicePad(TVirtualPad * pad, Float_t mT, Float_t mR, Float_t mB, Float_t mL)
+{
 // 	pad->Update();
 	pad->SetTopMargin(mT);
 	pad->SetBottomMargin(mB);
@@ -219,15 +301,26 @@ void RootTools::NicePad(TVirtualPad * pad, Float_t mT, Float_t mR, Float_t mB, F
 	pad->SetRightMargin(mR);
 }
 
-void RootTools::NiceHistogram(TH1 * h, Int_t ndivx, Int_t ndivy, Float_t xls, Float_t xts, Float_t xto, Float_t yls, Float_t yts, Float_t yto, Bool_t centerY, Bool_t centerX) {
+void RootTools::NicePad(TVirtualPad * pad, const PadFormat & format)
+{
+	RootTools::NicePad(pad, format.marginTop, format.marginRight, format.marginBottom, format.marginLeft);
+}
 
-	h->GetXaxis()->SetNdivisions(ndivx);
-	h->GetYaxis()->SetNdivisions(ndivy);
+void RootTools::NiceHistogram(TH1 * h, Int_t ndivx, Int_t ndivy,
+	Float_t xls, Float_t xlo, Float_t xts, Float_t xto,
+	Float_t yls, Float_t ylo, Float_t yts, Float_t yto,
+	Bool_t centerY, Bool_t centerX, Bool_t optX, Bool_t optY)
+{
+
+	h->GetXaxis()->SetNdivisions(ndivx, optX);
+	h->GetYaxis()->SetNdivisions(ndivy, optY);
 
 	h->SetStats(0);
 
 	h->SetLabelSize(xls, "X");
 	h->SetLabelSize(yls, "Y");
+	h->SetLabelOffset(xlo, "X");
+	h->SetLabelOffset(ylo, "Y");
 
 	h->SetTitleSize(xts, "X");
 	h->SetTitleSize(yts, "Y");
@@ -240,7 +333,14 @@ void RootTools::NiceHistogram(TH1 * h, Int_t ndivx, Int_t ndivy, Float_t xls, Fl
 		h->GetYaxis()->CenterTitle(centerY);
 }
 
-void RootTools::AutoScale(TH1 * hdraw, TH1 * href) {
+void RootTools::NiceHistogram(TH1 * h, const GraphFormat & format)
+{
+	RootTools::NiceHistogram(h, format.NdivX, format.NdivY,
+		format.Xls, format.Xlo, format.Xts, format.Xto, format.Yls, format.Ylo, format.Yts, format.Yto,
+		format.centerX, format.centerY, format.optX, format.optY);
+}
+
+void RootTools::AutoScale(TH1 * hdraw, TH1 * href, Bool_t MinOnZero) {
 	Float_t idrawmax = hdraw->GetBinContent(hdraw->GetMaximumBin());
 	Float_t irefmax = href->GetBinContent(href->GetMaximumBin());
 
@@ -251,8 +351,11 @@ void RootTools::AutoScale(TH1 * hdraw, TH1 * href) {
 	Float_t scalemin = irefmin < idrawmin ? irefmin : idrawmin;
 
 	Float_t delta = scalemax - scalemin;
-	scalemax += delta/10.;
-	scalemin -= delta/10.;
+	scalemax += delta/2.;
+	if (MinOnZero)
+		scalemin = 0.;
+	else
+		scalemin -= delta/10.;
 // 	scalemax = scalemax < 0. ? scalemax * 1.1 : scalemax * 0.9;
 // 	scalemin = scalemin < 0. ? scalemin * 1.1 : scalemin * 0.9;
 	hdraw->GetYaxis()->SetRangeUser(scalemin, scalemax);
@@ -349,4 +452,17 @@ TNamed * RootTools::GetObjectFromFile(TFile * f, const TString & name, const TSt
 	}
 
 	return dest;
+}
+void RootTools::NicePalette() {
+	const Int_t NRGBs = 5;
+	const Int_t NCont = 255;
+	Double_t stops[NRGBs] = { 0.00, 0.34, 0.61, 0.84, 1.00 };
+	Double_t red[NRGBs]   = { 0.00, 0.00, 0.87, 1.00, 0.51 };
+	Double_t green[NRGBs] = { 0.00, 0.81, 1.00, 0.20, 0.00 };
+	Double_t blue[NRGBs]  = { 0.51, 1.00, 0.12, 0.00, 0.00 };
+
+	TColor::CreateGradientColorTable(NRGBs, stops, red, green, blue, NCont);
+	gStyle->SetNumberContours(NCont);
+
+	gStyle->SetOptStat(0);
 }
