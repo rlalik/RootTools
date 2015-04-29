@@ -1,8 +1,13 @@
-cmake_minimum_required(VERSION 2.6)
+# cmake_minimum_required(VERSION 2.6)
+cmake_minimum_required(VERSION 3.0 FATAL_ERROR)
 project(RootTools)
 
-set (CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/Modules" ${CMAKE_MODULE_PATH})
-find_package(ROOT)
+# set (CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/Modules" ${CMAKE_MODULE_PATH})
+# find_package(ROOT)
+
+list(APPEND CMAKE_PREFIX_PATH $ENV{ROOTSYS})
+find_package(ROOT REQUIRED COMPONENTS MathCore Hist Tree ASImage Graf)
+include(${ROOT_USE_FILE})
 
 # # set(CMAKE_C_COMPILER /usr/bin/x86_64-pc-linux-gnu-gcc CACHE FILEPATH "C compiler" FORCE)
 # set(CMAKE_C_COMPILE_OBJECT "<CMAKE_C_COMPILER> <DEFINES>  -DQT_NO_DEBUG -DNDEBUG <FLAGS> -o <OBJECT> -c <SOURCE>" CACHE STRING "C compile command" FORCE)
@@ -18,27 +23,38 @@ set (VERSION ${library_VERSION_MAJOR}.${library_VERSION_MINOR}.${library_VERSION
 
 set(PRONAME RootTools)
 ##### find programs
-include_directories(${ROOT_INCLUDE_DIR})
-link_directories(${root_LIBRARIES_DIR})
+include_directories(${CMAKE_SOURCE_DIR} ${ROOT_INCLUDE_DIRS})
 
-set(library_SRCS ${CMAKE_CURRENT_SOURCE_DIR}/RootTools.cxx langaus.C) # ${CMAKE_CURRENT_SOURCE_DIR}/
-set(library_HDRS ${CMAKE_CURRENT_SOURCE_DIR}/RootTools.h) #
+add_definitions(${ROOT_CXX_FLAGS})
 
-set(library_DICT ${CMAKE_CURRENT_BINARY_DIR}/${PRONAME}Dict.cxx)
-set(library_LINKDEF ${CMAKE_CURRENT_SOURCE_DIR}/LinkDef.h)
+set(library_SRCS RootTools.cxx langaus.C) # ${CMAKE_CURRENT_SOURCE_DIR}/
+set(library_HDRS RootTools.h) #
+
+# set(library_DICT Dict_${PRONAME})
+set(library_DICT G__${PRONAME})
+set(library_LINKDEF ${PRONAME}LinkDef.h)
+
+# ROOT_GENERATE_DICTIONARY(
+# 	"${library_HDRS}" "${library_LINKDEF}"
+# 	"${library_DICT}" "${INCLUE_DIRECTORIES}"
+# )
 
 ROOT_GENERATE_DICTIONARY(
-	"${library_HDRS}" "${library_LINKDEF}"
-	"${library_DICT}" "${INCLUE_DIRECTORIES}"
+	"${library_DICT}" "${library_HDRS}" LINKDEF "${library_LINKDEF}" "${INCLUE_DIRECTORIES}"
 )
 
-add_library(${PRONAME} SHARED ${library_SRCS} ${library_DICT})
+# ROOT_GENERATE_DICTIONARY(G_event RootTools.h LINKDEF ${PRONAME}LinkDef.h)
 
-string(REGEX REPLACE "/" "." ROOT_VERSION ${ROOTVERSION})
+add_library(${PRONAME} SHARED ${library_SRCS} ${library_DICT}.cxx)
 
-target_link_libraries(${PRONAME} ${ROOT_LIBRARIES} ASImage)
+# string(REGEX REPLACE "/" "." ROOT_VERSION_DOT ${ROOTVERSION})
+
+string(REGEX REPLACE "/" "." ROOT_VERSION_DOT ${ROOT_VERSION})
+
+target_link_libraries(${PRONAME} ${ROOT_LIBRARIES})
+# ASImage
 set_target_properties(${PRONAME} PROPERTIES
-	SOVERSION ${ROOT_VERSION}
+	SOVERSION ${ROOT_VERSION_DOT}
 	PUBLIC_HEADER RootTools.h)
 
 #set_target_properties (tsetup PROPERTIES LINK_FLAGS ${root_LDFLAGS})
@@ -47,6 +63,9 @@ install(TARGETS ${PRONAME}
 	RUNTIME DESTINATION bin
 	LIBRARY DESTINATION lib
 	PUBLIC_HEADER DESTINATION include)
+
+install(FILES ${CMAKE_CURRENT_BINARY_DIR}/${library_DICT}_rdict.pcm ${CMAKE_CURRENT_BINARY_DIR}/lib${PRONAME}.rootmap
+	DESTINATION lib)
 
 # messages
 MESSAGE(STATUS "<<< Configuration >>>

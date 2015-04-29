@@ -12,6 +12,7 @@
 #include <TH1.h>
 #include <TH2.h>
 #include <TLatex.h>
+#include <TAttMarker.h>
 #include <TObjArray.h>
 #include <TObjString.h>
 #include <TPad.h>
@@ -360,17 +361,46 @@ void RootTools::NiceHistogram(TH1 * h, const GraphFormat & format)
 
 void RootTools::NiceHistogram(TH1 * h, const TString & text)
 {
-	TObjArray * arr = text.Tokenize(";");
+	TObjArray * arr = text.Tokenize(";,");
 
-	size_t arr_len = arr->GetSize();
+	size_t arr_len = arr->GetEntries();
 
 	for (uint i = 0; i < arr_len; ++i)
 	{
-		TObjArray * entry = ((TObjString *)arr->At(i))->GetString().Tokenize(":");
-		TString key = ((TObjString *)entry->At(i))->GetString();
-		TString val = ((TObjString *)entry->At(i))->GetString();
-		PR(key.Data());
-		PR(val.Data());
+// 		PR(i);
+		TObjArray * entry = ((TObjString *)arr->At(i))->GetString().Tokenize(":=");
+		if (entry->GetEntries() != 2)
+			continue;
+
+		TString key = ((TObjString *)entry->At(0))->GetString();
+		TString val = ((TObjString *)entry->At(1))->GetString();
+// 		PR(key.Data());
+// 		PR(val.Data());
+
+		if (key == "lc")
+			h->SetLineColor(val.Atoi());
+		else if (key == "lw")
+			h->SetLineWidth(val.Atoi());
+		else if (key == "lt")
+			h->SetLineStyle(val.Atoi());
+
+		else if (key == "mc")
+			h->SetMarkerColor(val.Atoi());
+		else if (key == "ms")
+			h->SetMarkerSize(val.Atof());
+		else if (key == "mt")
+			h->SetMarkerStyle(val.Atoi());
+
+		else if (key == "fc")
+			h->SetFillColor(val.Atoi());
+		else if (key == "ft")
+			h->SetFillStyle(val.Atoi());
+
+		else if (key == "ho")
+			h->SetOption(val);
+
+		else
+			printf(" - Unknow arguments %s = %s, skipping them...\n", key.Data(), val.Data());
 	}
 // 	char cmdchar = ((TObjString *)arr->At(0))->String()[0];
 // 	TString tmpstr;
