@@ -11,6 +11,10 @@
 #include <TF1.h>
 #include <TH1.h>
 #include <TH2.h>
+#include <TLatex.h>
+#include <TObjArray.h>
+#include <TObjString.h>
+#include <TPad.h>
 #include <TPaletteAxis.h>
 #include <TStyle.h>
 #include <TVirtualPad.h>
@@ -223,16 +227,17 @@ Double_t RootTools::Momentum(Double_t* yP, Double_t* par) {
 	return pt;
 }
 
-void RootTools::DrawAngleLine(Double_t angle, Double_t xdraw, Double_t ydraw, Double_t angledraw) {
+void RootTools::DrawAngleLine(Double_t angle, Double_t xdraw, Double_t ydraw, Double_t angledraw, Int_t color, Int_t width, Int_t style)
+{
 	static TF1* ThetaFunc = new TF1("ThetaFunc",&RootTools::MtY,-4,4,2);
 	TString anglelabel = TString::Format("#theta=%2.0f#circ", angle);
 
-	ThetaFunc->SetLineColor(2);
+	ThetaFunc->SetLineColor(color);
 
 	ThetaFunc->FixParameter(0,1115.6);
 	ThetaFunc->FixParameter(1,angle);
-	ThetaFunc->SetLineWidth(1);
-	ThetaFunc->SetLineStyle(2);
+	ThetaFunc->SetLineWidth(width);
+	ThetaFunc->SetLineStyle(style);
 	ThetaFunc->DrawCopy("same c");
 
 	TLatex* text = new TLatex;
@@ -245,16 +250,17 @@ void RootTools::DrawAngleLine(Double_t angle, Double_t xdraw, Double_t ydraw, Do
 	delete text;
 }
 
-void RootTools::DrawMomentumLine(Double_t mom, Double_t xdraw, Double_t ydraw, Double_t angledraw) {
+void RootTools::DrawMomentumLine(Double_t mom, Double_t xdraw, Double_t ydraw, Double_t angledraw, Int_t color, Int_t width, Int_t style)
+{
 	static TF1 * PFunc = new TF1("PFunc", &RootTools::Momentum,-4,4,2);
 	TString momentumlabel = TString::Format("p=%2.0f MeV/c", mom);
 
-	PFunc->SetLineColor(2);
+	PFunc->SetLineColor(color);
 
 	PFunc->FixParameter(0,1115.6);
 	PFunc->FixParameter(1,mom);
-	PFunc->SetLineWidth(1);
-	PFunc->SetLineStyle(2);
+	PFunc->SetLineWidth(width);
+	PFunc->SetLineStyle(style);
 	PFunc->DrawCopy("same c");
 
 	TLatex* text = new TLatex;
@@ -285,10 +291,22 @@ TPaletteAxis * RootTools::NicePalette(TH2 * h, Float_t ls, Float_t ts, Float_t t
 
 	if (!axis) return NULL;
 
-	axis->SetLabelSize(ls);
+// 	axis->SetLabelSize(ls);
 // 	axis->SetTitleSize(ts);
 // 	axis->SetTitleOffset(to);
 
+	return axis;
+}
+
+TPaletteAxis * RootTools::NoPalette(TH2 * h)
+{
+	gPad->Update();
+
+	TPaletteAxis * axis = (TPaletteAxis*)h->GetListOfFunctions()->FindObject("palette");
+
+	if (!axis) return NULL;
+
+	axis->Delete();
 	return axis;
 }
 
@@ -338,6 +356,56 @@ void RootTools::NiceHistogram(TH1 * h, const GraphFormat & format)
 	RootTools::NiceHistogram(h, format.NdivX, format.NdivY,
 		format.Xls, format.Xlo, format.Xts, format.Xto, format.Yls, format.Ylo, format.Yts, format.Yto,
 		format.centerX, format.centerY, format.optX, format.optY);
+}
+
+void RootTools::NiceHistogram(TH1 * h, const TString & text)
+{
+	TObjArray * arr = text.Tokenize(";");
+
+	size_t arr_len = arr->GetSize();
+
+	for (uint i = 0; i < arr_len; ++i)
+	{
+		TObjArray * entry = ((TObjString *)arr->At(i))->GetString().Tokenize(":");
+		TString key = ((TObjString *)entry->At(i))->GetString();
+		TString val = ((TObjString *)entry->At(i))->GetString();
+		PR(key.Data());
+		PR(val.Data());
+	}
+// 	char cmdchar = ((TObjString *)arr->At(0))->String()[0];
+// 	TString tmpstr;
+// 	char testchar = 0;
+// 	bool usecorr = true;
+// 	switch (cmdchar)
+// 	{
+// 		case 'e':
+// 			cdfdata->reffile = ((TObjString *)arr->At(1))->String();
+// 			break;
+// 		case 'c':
+// 			if (((TObjString *)arr->At(1))->String() == "maxy")
+// 			{
+// 				cfg_maxy[ ((TObjString *)arr->At(2))->String().Atoi() ] = ((TObjString *)arr->At(3))->String().Atof();
+// 
+// 					
+// 	h->GetXaxis()->SetNdivisions(ndivx, optX);
+// 	h->GetYaxis()->SetNdivisions(ndivy, optY);
+// 
+// 	h->SetStats(0);
+// 
+// 	h->SetLabelSize(xls, "X");
+// 	h->SetLabelSize(yls, "Y");
+// 	h->SetLabelOffset(xlo, "X");
+// 	h->SetLabelOffset(ylo, "Y");
+// 
+// 	h->SetTitleSize(xts, "X");
+// 	h->SetTitleSize(yts, "Y");
+// 	h->SetTitleOffset(xto, "X");
+// 	h->SetTitleOffset(yto, "Y");
+// 
+// 	if (centerX)
+// 		h->GetXaxis()->CenterTitle(centerX);
+// 	if (centerY)
+// 		h->GetYaxis()->CenterTitle(centerY);
 }
 
 void RootTools::AutoScale(TH1 * hdraw, TH1 * href, Bool_t MinOnZero) {
@@ -443,7 +511,7 @@ TNamed * RootTools::GetObjectFromFile(TFile * f, const TString & name, const TSt
 
 	dest = (TNamed*)f->Get(name);
 	if (!dest) {
-		std::cerr << "Error taking " << name.Data() << " from file " << "..." << ". Exiting..." << std::endl;
+		std::cerr << "Error taking " << name.Data() << " from file " << f->GetPath() << ". Exiting..." << std::endl;
 		exit(EXIT_FAILURE);
 	}
 
@@ -465,4 +533,426 @@ void RootTools::NicePalette() {
 	gStyle->SetNumberContours(NCont);
 
 	gStyle->SetOptStat(0);
+}
+
+TH1 * RootTools::CloneHistSubrange(TH1 * hist, char * name, Int_t bin_min, Int_t bin_max)
+{
+	TH1 * h = (TH1*)hist->Clone(name);
+	h->SetBins(bin_max - bin_min, hist->GetBinLowEdge(bin_min), hist->GetBinLowEdge(bin_max));
+
+	for (Int_t i = 0; i < bin_max - bin_min; ++i)
+	{
+		h->SetBinContent(1+i, hist->GetBinContent(bin_min + i));
+		h->SetBinError(1+i, hist->GetBinError(bin_min + i));
+	}
+
+	return h;
+}
+
+Int_t RootTools::FindEqualIntegralRange(TH1* hist, Float_t integral, Int_t starting_bin, Int_t step, Bool_t equal_or_bigger)
+{
+// 	Float_t eq_int = 0;
+
+	Int_t x_min = 0;
+	Int_t x_max = hist->GetNbinsX();
+
+	for (Int_t sec_edge = starting_bin + step; ; sec_edge += step)
+	{
+		if ( (step > 0 and sec_edge > x_max ) or (step < 0 and sec_edge < x_min ))
+			return starting_bin;
+
+		Float_t tmp_int = 0.;
+		if (step < 0)
+			tmp_int = hist->Integral(sec_edge, starting_bin);
+		if (step > 0)
+			tmp_int = hist->Integral(starting_bin, sec_edge);
+
+		if (tmp_int > integral)
+			if (equal_or_bigger)
+				return sec_edge;
+			else
+				return sec_edge - step;
+	}
+
+	return starting_bin;
+}
+
+void RootTools::QuickDraw(TVirtualPad * p, TH1 * h, const char * opts, UChar_t logbits)
+{
+	p->cd();
+	h->Draw(opts);
+
+	if (logbits & 0x01) p->SetLogz();
+	if (logbits & 0x02) p->SetLogx();
+	if (logbits & 0x04) p->SetLogy();
+}
+
+void RootTools::DrawStats(TVirtualPad * p, TH1 * h, UInt_t flags, Float_t x, Float_t y, Float_t dy)
+{
+	p->cd();
+
+	Float_t next_y = y;
+
+	TLatex * lt = new TLatex;
+	lt->SetNDC();
+	lt->SetTextSize(0.04);
+
+// 	lt->SetTextColor(38);
+// 	lt->SetTextColor(46);
+
+	if (flags & SF_COUNTS)
+	{
+		lt->DrawLatex(x, next_y, TString::Format("Counts: %.1f", h->Integral()));
+		next_y += dy;
+	}
+}
+
+bool RootTools::FindMaxRange(float & range, const TH1 * hist)
+{
+	int max_rb = hist->GetMaximumBin();
+	float max_r = hist->GetBinContent(max_rb);
+	if (max_r > range)
+	{
+		range = max_r;
+		return true;
+	}
+	
+	return false;
+}
+
+bool RootTools::FindMaxRange(float & range, float & cand)
+{
+	if (cand > range)
+	{
+		range = cand;
+		return true;
+	}
+	
+	return false;
+}
+
+void RootTools::MyMath()
+{
+	if (!gROOT->GetListOfFunctions()->FindObject("voigt"))
+	{
+		new TF1("voigt", "[0] * TMath::Voigt(x - [1], [2], [3], 4)", -1, 1);
+// 		new TF1("ggaus", "[0] * TMath::Gaus(x - [1], [2]) + [3]*TMath::Gaus(x - [4], [5])", 1095, 1150);
+// 		new TF1("ggaus", "[0] * TMath::Exp(-0.5*((x-[1])/[2])**2) + [3] * TMath::Exp(-0.5*((x-[1])/[4])**2)", -1, 1);
+// 		new TF1("g2aus", "[0] * TMath::Exp(-0.5*((x-[1])/[2])**2) + [3] * TMath::Exp(-0.5*((x-[1])/[4])**2)", -1, 1);
+	}
+
+	if (!gROOT->GetListOfFunctions()->FindObject("ggaus"))
+	{
+		new TF1("ggaus", "[0] * TMath::Exp(-0.5*((x-[1])/[2])**2) + [3] * TMath::Exp(-0.5*((x-[1])/[5])**2)", -1, 1);
+// 		new TF1("ggaus", "[0] * TMath::Voigt(x - [1], [2], [5], 4)", -1, 1);
+	}
+
+	if (!gROOT->GetListOfFunctions()->FindObject("daus"))
+	{
+		new TF1("daus", "[0] * TMath::Exp(-0.5*((x-[1])/[2])**2) + [3] * TMath::Exp(-0.5*((x-[1])/[4])**2)", -1, 1);
+	}
+
+	if (!gROOT->GetListOfFunctions()->FindObject("aexpo"))
+	{
+		new TF1("aexpo", "[0] * exp([1]*(x-[2]))", -1, 1);
+	}
+}
+
+void RootTools::FetchFitInfo(TF1 * fun, float & mean, float & width, float & sig, float & bkg, TPad * pad)
+{
+	const char * ftitle = fun->GetTitle();
+
+	if (strcmp(ftitle, "gaus(0)+gaus(3)") == 0)
+	{
+		Float_t fLambdaFitA1 = fun->GetParameter(0);
+		Float_t fLambdaFitM1 = fun->GetParameter(1);
+		Float_t fLambdaFitS1 = fun->GetParameter(2);
+
+		Float_t fLambdaFitA2 = fun->GetParameter(3);
+		Float_t fLambdaFitM2 = fun->GetParameter(1);
+		Float_t fLambdaFitS2 = fun->GetParameter(5);
+
+		mean = (fLambdaFitA1*fLambdaFitS1*fLambdaFitM1 + fLambdaFitA2*fLambdaFitS2*fLambdaFitM2)/(fLambdaFitA1*fLambdaFitS1 + fLambdaFitA2*fLambdaFitS2);
+		width = (fLambdaFitA1*fLambdaFitS1*fLambdaFitS1 + fLambdaFitA2*fLambdaFitS2*fLambdaFitS2)/(fLambdaFitA1*fLambdaFitS1 + fLambdaFitA2*fLambdaFitS2);
+
+		TLatex * latex = new TLatex();
+		latex->SetNDC();
+		latex->SetTextSize(0.03);
+		latex->DrawLatex(0.57, 0.81, TString::Format("Signal : %s", fun->GetExpFormula().Data()));
+		latex->DrawLatex(0.60, 0.77, TString::Format("A=%g", fLambdaFitA1));
+		latex->DrawLatex(0.60, 0.74, TString::Format("#mu=%g", fLambdaFitM1));
+		latex->DrawLatex(0.60, 0.71, TString::Format("#sigma=%g", fLambdaFitS1));
+		latex->DrawLatex(0.75, 0.77, TString::Format("A=%g", fLambdaFitA2));
+		latex->DrawLatex(0.75, 0.74, TString::Format("#mu=%g", fLambdaFitM2));
+		latex->DrawLatex(0.75, 0.71, TString::Format("#sigma=%g", fLambdaFitS2));
+
+		latex->DrawLatex(0.60, 0.67, TString::Format("/#mu=%g", mean));
+		latex->DrawLatex(0.60, 0.64, TString::Format("/#sigma=%g", width));
+	}
+
+	if (strcmp(ftitle, "ggaus") == 0)
+	{
+		Float_t fLambdaFitA1 = fun->GetParameter(0);
+		Float_t fLambdaFitA2 = fun->GetParameter(3);
+
+		Float_t fLambdaFitM = fun->GetParameter(1);
+
+		Float_t fLambdaFitS1 = TMath::Abs(fun->GetParameter(2));
+		Float_t fLambdaFitS2 = TMath::Abs(fun->GetParameter(5));
+
+		mean = fLambdaFitM;
+		/* from Wiki about Voigt profile */
+		width = (fLambdaFitA1*fLambdaFitS1*fLambdaFitS1 + fLambdaFitA2*fLambdaFitS2*fLambdaFitS2)/(fLambdaFitA1*fLambdaFitS1 + fLambdaFitA2*fLambdaFitS2);
+
+		TLatex * latex = new TLatex();
+		latex->SetNDC();
+		latex->SetTextSize(0.03);
+		latex->DrawLatex(0.57, 0.81, TString::Format("Signal : %s", fun->GetTitle()));
+		latex->DrawLatex(0.60, 0.77, TString::Format("A=%g", fLambdaFitA1));
+		latex->DrawLatex(0.60, 0.74, TString::Format("#sigma=%g", fLambdaFitS1));
+		latex->DrawLatex(0.75, 0.77, TString::Format("A=%g", fLambdaFitA2));
+		latex->DrawLatex(0.75, 0.74, TString::Format("#sigma=%g", fLambdaFitS2));
+		latex->DrawLatex(0.60, 0.64, TString::Format("#mu=%g", fLambdaFitM));
+		latex->DrawLatex(0.75, 0.64, TString::Format("/#sigma=%g", width));
+	}
+
+	if (strcmp(ftitle, "voigt") == 0)
+	{
+		Float_t fLambdaFitA = fun->GetParameter(0);
+		Float_t fLambdaFitM = fun->GetParameter(1);
+		Float_t fLambdaFitSL = fun->GetParameter(2);
+		Float_t fLambdaFitSG = fun->GetParameter(3);
+
+		mean = fLambdaFitM;
+		/* from Wiki about Voigt profile */
+		width = 0.5346 * fLambdaFitSL + TMath::Sqrt( 0.2166 * fLambdaFitSL * fLambdaFitSL + fLambdaFitSG * fLambdaFitSG);
+
+		TLatex * latex = new TLatex();
+		latex->SetNDC();
+		latex->SetTextSize(0.03);
+		latex->DrawLatex(0.57, 0.81, TString::Format("Signal : %s", fun->GetTitle()));
+		latex->DrawLatex(0.60, 0.77, TString::Format("A=%g", fLambdaFitA));
+		latex->DrawLatex(0.60, 0.74, TString::Format("#mu=%g", mean));
+		latex->DrawLatex(0.60, 0.71, TString::Format("#sigma_{L}=%g", fLambdaFitSL));
+		latex->DrawLatex(0.75, 0.71, TString::Format("#sigma_{G}=%g", fLambdaFitSG));
+		latex->DrawLatex(0.60, 0.68, TString::Format("FWHM=%g", width));
+	}
+}
+
+// bool RootTools::Smooth(TH1 * h, int par)
+// {
+// // 	TH1 * htmp = h->Clone("_XXYYZZ_temporary");
+// // 	h->Delete();
+// 
+// 	size_t nbins = h->GetNbinsX();
+// 	size_t abins = nbins - 2;
+// 
+// 	PR(abins);
+// 
+// 	bool * mark_bins = new bool[nbins];
+// 	float * bc = new float[nbins-2];
+// 	float * fc = new float[nbins-2];
+// 
+// 	for (uint i = 1; i < nbins-1; ++i)
+// 	{
+// 		bc[i-1] = h->GetBinContent(i);
+// 		fc[i-1] = bc[i-1];
+// 	}
+// 
+// 	for (uint i = 0; i < abins; ++i)
+// 	{
+// 		PR(i);
+// 		if (i < 1)
+// 		{
+// 			if (
+// 				(bc[i] > bc[i+1] and bc[i+1] < bc[i+2]) or
+// 				(bc[i] < bc[i+1] and bc[i+1] > bc[i+2])
+// 			)
+// 			{
+// 				float sum = bc[i] + bc[i+1];
+// 				float dif = bc[i] - bc[i+1];
+// 
+// // 				float avg = sum/2.0;
+// 
+// 				float part = dif * 0.1;
+// 				fc[i] -= part;
+// 				fc[i+1] += part;
+// 			}
+// 		}
+// 		else if (i > abins-2)
+// 		{
+// 			if (
+// 				(bc[i] > bc[i+1] and bc[i-1] < bc[i]) or
+// 				(bc[i] < bc[i+1] and bc[i-1] > bc[i])
+// 			)
+// 			{
+// 				float sum = bc[i] + bc[i+1];
+// 				float dif = bc[i] - bc[i+1];
+// 
+// // 				float avg = sum/2.0;
+// 
+// 				float part = dif * 0.1;
+// 				fc[i] -= part;
+// 				fc[i+1] += part;
+// 			}
+// 		}
+// 		else
+// 		{
+// 			if (
+// 				(bc[i] > bc[i+1] and bc[i+1] < bc[i+2] and bc[i-1] < bc[i]) or
+// 				(bc[i] < bc[i+1] and bc[i+1] > bc[i+2] and bc[i-1] > bc[i])
+// 			)
+// 			{
+// 				float sum = bc[i] + bc[i+1];
+// 				float dif = bc[i] - bc[i+1];
+// 
+// // 				float avg = sum/2.0;
+// 
+// 				float part = dif * 0.1;
+// 				fc[i] -= part;
+// 				fc[i+1] += part;
+// 			}
+// 		}
+// 	}
+// 
+// 	for (uint i = 1; i < nbins-1; ++i)
+// 	{
+// 		printf("%03d   : %f  --  %f\n", i, bc[i-1], fc[i-1]);
+// 		h->SetBinContent(i, fc[i-1]);
+// 	}
+// 
+// 	return true;
+// }
+
+bool RootTools::Smooth(TH1 * h)
+{
+// 	TH1 * htmp = h->Clone("_XXYYZZ_temporary");
+// 	h->Delete();
+
+	float mod_ratio = 0.2;
+	float total_integral = h->Integral();
+
+	size_t nbins = h->GetNbinsX();
+
+	bool * mark_bins = new bool[nbins];
+	float * bc = new float[nbins];
+	float * fc = new float[nbins];
+// 	float * dd = new float[nbins];
+	float bw = h->GetBinWidth(1);
+
+// 	dd[nbins-1] = 0.;
+
+	for (uint i = 0; i < nbins; ++i)
+	{
+		bc[i] = h->GetBinContent(1+i);
+		fc[i] = bc[i];
+
+// 		if (i > 0)
+// 			dd[i-1] = (bc[i] - bc[i-1])/bw;
+	}
+
+	for (uint i = 0; i < nbins; ++i)
+	{
+		if (i == 0)
+		{
+			if (
+				(bc[i] > bc[i+1]) or
+				(bc[i] < bc[i+1])
+			)
+			{
+				float dif_r = bc[i] - bc[i+1];
+
+				fc[i] -= (dif_r) * mod_ratio * 0.5;
+				fc[i+1] += dif_r * mod_ratio * 0.5;
+			}
+		}
+		else if (i == (nbins-1))
+		{
+			if (
+				(bc[i-1] < bc[i]) or
+				(bc[i-1] > bc[i])
+			)
+			{
+				float dif_l = bc[i] - bc[i-1];
+
+				fc[i-1] += dif_l * mod_ratio * 0.5;
+				fc[i] -= (dif_l) * mod_ratio * 0.5;
+			}
+		}
+		else
+		{
+			if (
+// 				(bc[i] > bc[i+1] and bc[i-1] < bc[i]) or
+// 				(bc[i] < bc[i+1] and bc[i-1] > bc[i])
+				(bc[i] > bc[i+1] and bc[i+1] < bc[i+2] and bc[i-1] < bc[i]) or
+				(bc[i] < bc[i+1] and bc[i+1] > bc[i+2] and bc[i-1] > bc[i])
+
+			)
+			{
+				float dif_l = bc[i] - bc[i-1];
+				float dif_r = bc[i] - bc[i+1];
+
+				fc[i-1] += dif_l * mod_ratio;
+				fc[i] -= (dif_l + dif_r) * mod_ratio;
+				fc[i+1] += dif_r * mod_ratio;
+			}
+		}
+	}
+
+	for (uint i = 0; i < nbins; ++i)
+	{
+// 		printf("%03d   : %f  --  %f  ->  %f\n", i, bc[i], fc[i], dd[i]);
+		h->SetBinContent(1+i, fc[i]);
+// 		h->SetBinContent(1+i, dd[i]);
+	}
+
+	Float_t new_total_integral = h->Integral();
+
+// 	printf("scaling by %f", total_integral/new_total_integral);
+	h->Scale(total_integral/new_total_integral);
+
+	delete [] bc;
+	delete [] fc;
+// 	delete [] dd;
+
+	return true;
+}
+
+bool RootTools::Smooth(TH1 * h, int loops)
+{
+	for (int i = 0; i < loops; ++i)
+		Smooth(h);
+}
+
+const char * termcolors[TC_None+1] = {
+	"\x1b[0;30m", "\x1b[0;31m", "\x1b[0;32m", "\x1b[0;33m",
+	"\x1b[0;34m", "\x1b[0;35m", "\x1b[0;36m", "\x1b[0;37m",
+	
+	"\x1b[1;30m", "\x1b[1;31m", "\x1b[1;32m", "\x1b[1;33m",
+	"\x1b[1;34m", "\x1b[1;35m", "\x1b[1;36m", "\x1b[1;37m",
+	
+	"\x1b[33;0m"
+};
+
+std::ostream & colstd(std::ostream & os)
+{
+	os << termcolors[TC_YellowB] << std::flush;
+	return os;
+}
+
+std::ostream & resstd(std::ostream & os)
+{
+	os << termcolors[TC_None] << std::flush;
+	return os;
+}
+
+std::ostream & operator<<(std::ostream & os, const smanip & m)
+{
+	return m.f(os, m.i);
+}
+
+std::ostream & set_color(std::ostream & s, TermColors c)
+{
+	s << termcolors[c] << std::flush;
+	return s;
 }
