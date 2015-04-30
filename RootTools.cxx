@@ -202,6 +202,7 @@ Double_t RootTools::MtY(Double_t* yP, Double_t* par) {
 		return 1000000.0;
 	}
 
+	(void)mt;
 	return pt;
 }
 
@@ -285,7 +286,11 @@ void RootTools::DrawLine(Double_t x1, Double_t y1, Double_t x2, Double_t y2, Int
 	line->DrawLine(x1, y1, x2, y2);
 }
 
-TPaletteAxis * RootTools::NicePalette(TH2 * h, Float_t ls, Float_t ts, Float_t to) {
+TPaletteAxis * RootTools::NicePalette(TH2 * h, Float_t ls, Float_t ts, Float_t to)
+{
+	(void)ls;
+	(void)ts;
+	(void)to;
 	gPad->Update();
 
 	TPaletteAxis * axis = (TPaletteAxis*)h->GetListOfFunctions()->FindObject("palette");
@@ -598,10 +603,16 @@ Int_t RootTools::FindEqualIntegralRange(TH1* hist, Float_t integral, Int_t start
 			tmp_int = hist->Integral(starting_bin, sec_edge);
 
 		if (tmp_int > integral)
+		{
 			if (equal_or_bigger)
+			{
 				return sec_edge;
+			}
 			else
+			{
 				return sec_edge - step;
+			}
+		}
 	}
 
 	return starting_bin;
@@ -690,6 +701,10 @@ void RootTools::MyMath()
 
 void RootTools::FetchFitInfo(TF1 * fun, float & mean, float & width, float & sig, float & bkg, TPad * pad)
 {
+	(void)sig;
+	(void)bkg;
+	(void)pad;
+
 	const char * ftitle = fun->GetTitle();
 
 	if (strcmp(ftitle, "gaus(0)+gaus(3)") == 0)
@@ -868,7 +883,7 @@ bool RootTools::Smooth(TH1 * h)
 	float * bc = new float[nbins];
 	float * fc = new float[nbins];
 // 	float * dd = new float[nbins];
-	float bw = h->GetBinWidth(1);
+// 	float bw = h->GetBinWidth(1);
 
 // 	dd[nbins-1] = 0.;
 
@@ -945,13 +960,16 @@ bool RootTools::Smooth(TH1 * h)
 	delete [] fc;
 // 	delete [] dd;
 
+	delete [] mark_bins; mark_bins = 0;
 	return true;
 }
 
 bool RootTools::Smooth(TH1 * h, int loops)
 {
 	for (int i = 0; i < loops; ++i)
-		Smooth(h);
+		if (!Smooth(h)) return false;
+
+	return true;
 }
 
 const char * termcolors[TC_None+1] = {
