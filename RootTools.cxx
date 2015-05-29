@@ -19,6 +19,7 @@
 #include <TPaletteAxis.h>
 #include <TStyle.h>
 #include <TVirtualPad.h>
+#include <TROOT.h>
 
 #include <iostream>
 
@@ -1036,7 +1037,7 @@ float RootTools::Normalize(TH1 * h, TH1 * href, bool extended)
 		hr_temp->Multiply(hc_mask);
 
 		float scale = Normalize(hc_temp, hr_temp);
-		h->Scale( scale, false );
+		h->Scale( scale, 0 );
 
 		hc_mask->Delete();
 		hr_mask->Delete();
