@@ -672,6 +672,45 @@ bool RootTools::FindMaxRange(float & range, float & cand)
 	return false;
 }
 
+bool RootTools::FindRangeExtremum(float & min, float & max, const TH1 * hist)
+{
+	int max_rb = hist->GetMaximumBin();
+	float max_r = hist->GetBinContent(max_rb);
+	if (max_r > max)
+	{
+		max = max_r;
+// 		return true;
+	}
+
+	int min_rb = hist->GetMinimumBin();
+	float min_r = hist->GetBinContent(min_rb);
+	if (min_r < min)
+	{
+		min = min_r;
+// 		return true;
+	}
+
+	return false;
+}
+
+bool RootTools::FindRangeExtremum(float & min, float & max, float & cand)
+{
+	if (cand > max)
+	{
+		max = cand;
+// 		return true;
+	}
+
+	if (cand < min)
+	{
+		min = cand;
+// 		return true;
+	}
+
+	return false;
+}
+
+
 void RootTools::MyMath()
 {
 	if (!gROOT->GetListOfFunctions()->FindObject("voigt"))
@@ -970,6 +1009,43 @@ bool RootTools::Smooth(TH1 * h, int loops)
 		if (!Smooth(h)) return false;
 
 	return true;
+}
+
+float RootTools::Normalize(TH1 * h, TH1 * href, bool extended)
+{
+	if (!extended)
+	{
+		Float_t integral_ref = href->Integral();
+		Float_t integral_cur = h->Integral();
+
+		h->Scale(integral_ref/integral_cur);
+		return integral_ref/integral_cur;
+	}
+	else
+	{
+		TH1 * hc_mask = (TH1*)h->Clone("___XXX___hc_mask");
+		TH1 * hr_mask = (TH1*)href->Clone("___XXX___hr_mask");
+
+		hc_mask->Divide(h);
+		hr_mask->Divide(href);
+
+		TH1 * hc_temp = (TH1*)h->Clone("___XXX___hc_temp");
+		TH1 * hr_temp = (TH1*)href->Clone("___XXX___hr_temp");
+
+		hc_temp->Multiply(hr_mask);
+		hr_temp->Multiply(hc_mask);
+
+		float scale = Normalize(hc_temp, hr_temp);
+		h->Scale( scale, false );
+
+		hc_mask->Delete();
+		hr_mask->Delete();
+		hc_temp->Delete();
+		hr_temp->Delete();
+
+		return scale;
+	}
+	return 0.;
 }
 
 const char * termcolors[TC_None+1] = {

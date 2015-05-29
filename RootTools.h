@@ -192,11 +192,16 @@ namespace RootTools
 	bool FindMaxRange(float & range, const TH1 * hist);
 	bool FindMaxRange(float & range, float & cand);
 
+	bool FindRangeExtremum(float & min, float & max, const TH1 * hist);
+	bool FindRangeExtremum(float & min, float & max, float & cand);
+
 	void MyMath();
 	void FetchFitInfo(TF1 * fun, float & mean, float & width, float & sig, float & bkg, TPad * pad = nullptr);
 
 	bool Smooth(TH1 * h);
 	bool Smooth(TH1 * h, int loops);
+
+	float Normalize(TH1 * h, TH1 * href, bool extended = false);
 };
 
 Double_t langaufun(Double_t *x, Double_t *par);
