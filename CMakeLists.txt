@@ -1,13 +1,17 @@
 cmake_minimum_required(VERSION 2.6)
 project(RootTools)
+set(PRONAME RootTools)
 
-set (CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/Modules" ${CMAKE_MODULE_PATH})
-find_package(ROOT)
+set(CMAKE_INSTALL_LIBDIR "lib" CACHE PATH "object code libraries (lib)")
+set(CMAKE_INSTALL_INCLUDEDIR "include" CACHE PATH "object code libraries (lib)")
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 
-# # set(CMAKE_C_COMPILER /usr/bin/x86_64-pc-linux-gnu-gcc CACHE FILEPATH "C compiler" FORCE)
-# set(CMAKE_C_COMPILE_OBJECT "<CMAKE_C_COMPILER> <DEFINES>  -DQT_NO_DEBUG -DNDEBUG <FLAGS> -o <OBJECT> -c <SOURCE>" CACHE STRING "C compile command" FORCE)
-# # set(CMAKE_CXX_COMPILER /usr/bin/x86_64-pc-linux-gnu-g++ CACHE FILEPATH "C++ compiler" FORCE)
-# set(CMAKE_CXX_COMPILE_OBJECT "<CMAKE_CXX_COMPILER> <DEFINES>  -DQT_NO_DEBUG -DNDEBUG <FLAGS> -o <OBJECT> -c <SOURCE>" CACHE STRING "C++ compile command" FORCE)
+# ROOT
+list(APPEND CMAKE_PREFIX_PATH $ENV{ROOTSYS})
+find_package(ROOT QUIET
+	REQUIRED COMPONENTS Core  RIO Net Hist Graf Graf3d Gpad Tree Rint Postscript Matrix Physics MathCore Thread
+	OPTIONAL_COMPONENTS Cling Cint)
 
 # The version number.
 set (library_VERSION_MAJOR 0)
@@ -16,37 +20,13 @@ set (library_VERSION_PATCH 1)
 
 set (VERSION ${library_VERSION_MAJOR}.${library_VERSION_MINOR}.${library_VERSION_PATCH})
 
-set(PRONAME RootTools)
 ##### find programs
-include_directories(${ROOT_INCLUDE_DIR})
-link_directories(${root_LIBRARIES_DIR})
+include(${ROOT_USE_FILE})
 
-set(library_SRCS ${CMAKE_CURRENT_SOURCE_DIR}/RootTools.cxx langaus.C) # ${CMAKE_CURRENT_SOURCE_DIR}/
-set(library_HDRS ${CMAKE_CURRENT_SOURCE_DIR}/RootTools.h) #
+include_directories(${ROOT_INCLUDE_DIR} inc)
+link_directories(${ROOT_LIBRARIES_DIR})
 
-set(library_DICT ${CMAKE_CURRENT_BINARY_DIR}/${PRONAME}Dict.cxx)
-set(library_LINKDEF ${CMAKE_CURRENT_SOURCE_DIR}/LinkDef.h)
-
-ROOT_GENERATE_DICTIONARY(
-	"${library_HDRS}" "${library_LINKDEF}"
-	"${library_DICT}" "${INCLUE_DIRECTORIES}"
-)
-
-add_library(${PRONAME} SHARED ${library_SRCS} ${library_DICT})
-
-string(REGEX REPLACE "/" "." ROOT_VERSION ${ROOTVERSION})
-
-target_link_libraries(${PRONAME} ${ROOT_LIBRARIES} ASImage)
-set_target_properties(${PRONAME} PROPERTIES
-	SOVERSION ${ROOT_VERSION}
-	PUBLIC_HEADER RootTools.h)
-
-#set_target_properties (tsetup PROPERTIES LINK_FLAGS ${root_LDFLAGS})
-
-install(TARGETS ${PRONAME}
-	RUNTIME DESTINATION bin
-	LIBRARY DESTINATION lib
-	PUBLIC_HEADER DESTINATION include)
+ROOT_STANDARD_LIBRARY_PACKAGE(${PRONAME} DEPENDENCIES ${ROOT_LIBRARIES})
 
 # messages
 MESSAGE(STATUS "<<< Configuration >>>
