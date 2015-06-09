@@ -14,14 +14,6 @@ set(CMAKE_INSTALL_INCLUDEDIR "include" CACHE PATH "object code libraries (lib)")
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 
-# Make relative paths absolute (needed later on)
-# foreach(p LIB BIN INCLUDE CMAKE)
-# 	set(var CMAKE_INSTALL_${p}DIR)
-# 	if(NOT IS_ABSOLUTE "${${var}}")
-# 		set(${var} "${CMAKE_INSTALL_PREFIX}/${${var}}")
-# 	endif()
-# endforeach()
-
 # ROOT
 list(APPEND CMAKE_PREFIX_PATH $ENV{ROOTSYS})
 find_package(ROOT QUIET
