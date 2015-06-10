@@ -313,8 +313,9 @@ TPaletteAxis * RootTools::NoPalette(TH2 * h)
 
 	if (!axis) return NULL;
 
+	(TPaletteAxis*)h->GetListOfFunctions()->Remove(axis);
 	axis->Delete();
-	return axis;
+	return 0;
 }
 
 void RootTools::NicePad(TVirtualPad * pad, Float_t mT, Float_t mR, Float_t mB, Float_t mL)
