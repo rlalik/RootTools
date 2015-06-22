@@ -3,6 +3,8 @@
 
 // #include <TROOT.h>
 #include <TString.h>
+#include <TH1.h>
+#include <TH2.h>
 
 class TCanvas;
 class TF1;
@@ -192,7 +194,6 @@ namespace RootTools
 	bool FindMaxRange(float & range, const TH1 * hist);
 	bool FindMaxRange(float & range, float & cand);
 
-	bool FindRangeExtremum(float & min, float & max, const TH1 * hist);
 	bool FindRangeExtremum(float & min, float & max, float & cand);
 
 	void MyMath();
@@ -202,6 +203,14 @@ namespace RootTools
 	bool Smooth(TH1 * h, int loops);
 
 	float Normalize(TH1 * h, TH1 * href, bool extended = false);
+
+	std::string MergeDrawOptions(TString prefix, TString options, TString alt);
+
+	template<class T>
+	bool FindRangeExtremum(T & min, T & max, const TH1 * hist);
+
+	template<class T>
+	bool FindRangeExtremum(T & min, T & max, const TH2 * hist);
 };
 
 Double_t langaufun(Double_t *x, Double_t *par);
@@ -233,4 +242,52 @@ std::ostream & operator<<(std::ostream & os, const smanip & m);
 std::ostream & set_color(std::ostream & s, TermColors c);
 inline smanip color(TermColors n) { return smanip(set_color ,n); }
 
+
+template<class T>
+bool RootTools::FindRangeExtremum(T & min, T & max, const TH1 * hist)
+{
+	int max_rb = hist->GetMaximumBin();
+	T max_r = hist->GetBinContent(max_rb);
+	if (max_r > max)
+	{
+		max = max_r;
+// 		return true;
+	}
+
+	int min_rb = hist->GetMinimumBin();
+	T min_r = hist->GetBinContent(min_rb);
+	if (min_r < min)
+	{
+		min = min_r;
+// 		return true;
+	}
+
+	return true;
+}
+
+template<class T>
+bool RootTools::FindRangeExtremum(T & min, T & max, const TH2 * hist)
+{
+	int max_rb_x, max_rb_y, max_rb_z;
+	hist->GetMaximumBin(max_rb_x, max_rb_y, max_rb_z);
+	int min_rb_x, min_rb_y, min_rb_z;
+	hist->GetMinimumBin(min_rb_x, min_rb_y, min_rb_z);
+
+	T max_r = hist->GetBinContent(max_rb_x, max_rb_y);
+	if (max_r > max)
+	{
+		max = max_r;
+// 		return true;
+	}
+
+	int min_rb = hist->GetMinimumBin();
+	T min_r = hist->GetBinContent(min_rb_x, min_rb_y);
+	if (min_r < min)
+	{
+		min = min_r;
+// 		return true;
+	}
+
+	return true;
+}
 #endif /* ROOTTOOLS_H */

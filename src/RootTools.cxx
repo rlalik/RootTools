@@ -674,27 +674,6 @@ bool RootTools::FindMaxRange(float & range, float & cand)
 	return false;
 }
 
-bool RootTools::FindRangeExtremum(float & min, float & max, const TH1 * hist)
-{
-	int max_rb = hist->GetMaximumBin();
-	float max_r = hist->GetBinContent(max_rb);
-	if (max_r > max)
-	{
-		max = max_r;
-// 		return true;
-	}
-
-	int min_rb = hist->GetMinimumBin();
-	float min_r = hist->GetBinContent(min_rb);
-	if (min_r < min)
-	{
-		min = min_r;
-// 		return true;
-	}
-
-	return false;
-}
-
 bool RootTools::FindRangeExtremum(float & min, float & max, float & cand)
 {
 	if (cand > max)
@@ -711,7 +690,6 @@ bool RootTools::FindRangeExtremum(float & min, float & max, float & cand)
 
 	return false;
 }
-
 
 void RootTools::MyMath()
 {
@@ -1081,4 +1059,22 @@ std::ostream & set_color(std::ostream & s, TermColors c)
 {
 	s << termcolors[c] << std::flush;
 	return s;
+}
+
+std::string RootTools::MergeDrawOptions(TString prefix, TString options, TString alt)
+{
+	std::string res;
+	if (options.Length())
+	{
+// 		printf(" --> Using options ");
+		res = (prefix + "," + options).Data();
+	}
+	else
+	{
+// 		printf(" --> Using alt ");
+		res = (prefix + "," + alt).Data();
+	}
+
+// 	printf("%s\n", res.c_str());
+	return res;
 }
