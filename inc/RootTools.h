@@ -114,6 +114,7 @@ namespace RootTools
 
 		Int_t NdivX;
 		Int_t NdivY;
+
 		Float_t Xls;
 		Float_t Xlo;
 		Float_t Xts;
@@ -122,6 +123,7 @@ namespace RootTools
 		Float_t Ylo;
 		Float_t Yts;
 		Float_t Yto;
+
 		Bool_t centerX;
 		Bool_t centerY;
 		Bool_t optX;
@@ -280,7 +282,6 @@ bool RootTools::FindRangeExtremum(T & min, T & max, const TH2 * hist)
 // 		return true;
 	}
 
-	int min_rb = hist->GetMinimumBin();
 	T min_r = hist->GetBinContent(min_rb_x, min_rb_y);
 	if (min_r < min)
 	{
