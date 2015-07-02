@@ -169,7 +169,7 @@ namespace RootTools
 	void NicePad(TVirtualPad * pad, Float_t mT, Float_t mR, Float_t mB, Float_t mL);
 	void NicePad(TVirtualPad * pad, const PadFormat & format);
 
-	void NiceHistogram(TH1 * h, Int_t ndivx, Int_t ndivy, Float_t xls, Float_t xlo, Float_t xts, Float_t xto, Float_t yls, Float_t ylo, Float_t yts, Float_t yto, Bool_t centerY = kFALSE, Bool_t centerX = kFALSE, Bool_t optX = kTRUE, Bool_t optY = kTRUE);
+	void NiceHistogram(TH1 * h, Int_t ndivx, Int_t ndivy, Float_t xls, Float_t xlo, Float_t xts, Float_t xto, Float_t yls, Float_t ylo, Float_t yts, Float_t yto, Bool_t centerX = kFALSE, Bool_t centerY = kFALSE, Bool_t optX = kTRUE, Bool_t optY = kTRUE);
 	void NiceHistogram(TH1 * h, const GraphFormat & format);
 	void NiceHistogram(TH1 * h, const TString & text);
 

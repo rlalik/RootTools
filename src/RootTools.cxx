@@ -335,7 +335,7 @@ void RootTools::NicePad(TVirtualPad * pad, const PadFormat & format)
 void RootTools::NiceHistogram(TH1 * h, Int_t ndivx, Int_t ndivy,
 	Float_t xls, Float_t xlo, Float_t xts, Float_t xto,
 	Float_t yls, Float_t ylo, Float_t yts, Float_t yto,
-	Bool_t centerY, Bool_t centerX, Bool_t optX, Bool_t optY)
+	Bool_t centerX, Bool_t centerY, Bool_t optX, Bool_t optY)
 {
 
 	h->GetXaxis()->SetNdivisions(ndivx, optX);
@@ -707,9 +707,9 @@ void RootTools::MyMath()
 // 		new TF1("ggaus", "[0] * TMath::Voigt(x - [1], [2], [5], 4)", -1, 1);
 	}
 
-	if (!gROOT->GetListOfFunctions()->FindObject("daus"))
+	if (!gROOT->GetListOfFunctions()->FindObject("dgaus"))
 	{
-		new TF1("daus", "[0] * TMath::Exp(-0.5*((x-[1])/[2])**2) + [3] * TMath::Exp(-0.5*((x-[1])/[4])**2)", -1, 1);
+		new TF1("dgaus", "[0] * TMath::Exp(-0.5*((x-[1])/[2])**2) + [3] * TMath::Exp(-0.5*((x-[1])/[4])**2)", -1, 1);
 	}
 
 	if (!gROOT->GetListOfFunctions()->FindObject("aexpo"))
@@ -763,6 +763,32 @@ void RootTools::FetchFitInfo(TF1 * fun, float & mean, float & width, float & sig
 
 		Float_t fLambdaFitS1 = TMath::Abs(fun->GetParameter(2));
 		Float_t fLambdaFitS2 = TMath::Abs(fun->GetParameter(5));
+
+		mean = fLambdaFitM;
+		/* from Wiki about Voigt profile */
+		width = (fLambdaFitA1*fLambdaFitS1*fLambdaFitS1 + fLambdaFitA2*fLambdaFitS2*fLambdaFitS2)/(fLambdaFitA1*fLambdaFitS1 + fLambdaFitA2*fLambdaFitS2);
+
+		TLatex * latex = new TLatex();
+		latex->SetNDC();
+		latex->SetTextSize(0.03);
+		latex->DrawLatex(0.57, 0.81, TString::Format("Signal : %s", fun->GetTitle()));
+		latex->DrawLatex(0.60, 0.77, TString::Format("A=%g", fLambdaFitA1));
+		latex->DrawLatex(0.60, 0.74, TString::Format("#sigma=%g", fLambdaFitS1));
+		latex->DrawLatex(0.75, 0.77, TString::Format("A=%g", fLambdaFitA2));
+		latex->DrawLatex(0.75, 0.74, TString::Format("#sigma=%g", fLambdaFitS2));
+		latex->DrawLatex(0.60, 0.64, TString::Format("#mu=%g", fLambdaFitM));
+		latex->DrawLatex(0.75, 0.64, TString::Format("/#sigma=%g", width));
+	}
+
+	if (strcmp(ftitle, "dgaus") == 0)
+	{
+		Float_t fLambdaFitA1 = fun->GetParameter(0);
+		Float_t fLambdaFitA2 = fun->GetParameter(3);
+
+		Float_t fLambdaFitM = fun->GetParameter(1);
+
+		Float_t fLambdaFitS1 = TMath::Abs(fun->GetParameter(2));
+		Float_t fLambdaFitS2 = TMath::Abs(fun->GetParameter(4));
 
 		mean = fLambdaFitM;
 		/* from Wiki about Voigt profile */
