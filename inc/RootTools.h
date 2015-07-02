@@ -9,67 +9,12 @@
 class TCanvas;
 class TF1;
 class TFile;
+class TGraph;
 class TH1;
 class TH2;
 class TPad;
 class TPaletteAxis;
 class TVirtualPad;
-
-// struct PadFormat {
-// 	Float_t marginTop;
-// 	Float_t marginRight;
-// 	Float_t marginBottom;
-// 	Float_t marginLeft;
-// 
-// 	PadFormat() :
-// 		marginTop(0.1), marginRight(0.1), marginBottom(0.1), marginLeft(0.1) {}
-// };
-// 
-// struct GraphFormat {
-// 	Int_t NdivX;
-// 	Int_t NdivY;
-// 	Float_t Xls;
-// 	Float_t Xlo;
-// 	Float_t Xts;
-// 	Float_t Xto;
-// 	Float_t Yls;
-// 	Float_t Ylo;
-// 	Float_t Yts;
-// 	Float_t Yto;
-// 	Bool_t centerX;
-// 	Bool_t centerY;
-// 
-// 	GraphFormat() :
-// 		NdivX(505), NdivY(505),
-// 		Xls(0.07), Xlo(0.05), Xts(0.07), Xto(0.05),
-// 		Yls(0.07), Ylo(0.05), Yts(0.07), Yto(0.05),
-// 		centerX(kFALSE), centerY(kFALSE) {}
-// };
-
-// struct PadFormat {
-// 	Float_t marginTop		= 0.1;
-// 	Float_t marginRight		= 0.1;
-// 	Float_t marginBottom	= 0.1;
-// 	Float_t marginLeft		= 0.1;
-// };
-// 
-// struct GraphFormat {
-// 	Int_t NdivX			= 505;
-// 	Int_t NdivY			= 505;
-// 	Float_t Xls			= 0.07;
-// 	Float_t Xlo			= 0.05;
-// 	Float_t Xts			= 0.07;
-// 	Float_t Xto			= 0.05;
-// 	Float_t Yls			= 0.07;
-// 	Float_t Ylo			= 0.05;
-// 	Float_t Yts			= 0.07;
-// 	Float_t Yto			= 0.05;
-// 	Bool_t centerX		= kFALSE;
-// 	Bool_t centerY		= kFALSE;
-// };
-// 
-// struct PaintFormat : public PadFormat, public GraphFormat {
-// };
 
 namespace RootTools
 {
@@ -107,40 +52,16 @@ namespace RootTools
 
 	struct PaintFormat
 	{
-		Float_t marginTop;
-		Float_t marginRight;
-		Float_t marginBottom;
-		Float_t marginLeft;
-
-		Int_t NdivX;
-		Int_t NdivY;
-
-		Float_t Xls;
-		Float_t Xlo;
-		Float_t Xts;
-		Float_t Xto;
-		Float_t Yls;
-		Float_t Ylo;
-		Float_t Yts;
-		Float_t Yto;
-
-		Bool_t centerX;
-		Bool_t centerY;
-		Bool_t optX;
-		Bool_t optY;
+		PadFormat pf;
+		GraphFormat gf;
 	};
 
 	void def(PadFormat & f);
 	void def(GraphFormat & f);
 	void def(PaintFormat & f);
 
-	PadFormat fpad(PaintFormat f);
-	GraphFormat fgraph(PaintFormat f);
-
 	// Export Images
 	extern Bool_t gHasImgExportEnabled;
-
-// 	extern TString gImgExportDir;
 
 	extern Bool_t gImgExportPNG;
 	extern Bool_t gImgExportEPS;
@@ -196,8 +117,6 @@ namespace RootTools
 	bool FindMaxRange(float & range, const TH1 * hist);
 	bool FindMaxRange(float & range, float & cand);
 
-	bool FindRangeExtremum(float & min, float & max, float & cand);
-
 	void MyMath();
 	void FetchFitInfo(TF1 * fun, float & mean, float & width, float & sig, float & bkg, TPad * pad = nullptr);
 
@@ -206,13 +125,19 @@ namespace RootTools
 
 	float Normalize(TH1 * h, TH1 * href, bool extended = false);
 
-	std::string MergeDrawOptions(TString prefix, TString options, TString alt);
+	TString MergeOptions(const TString & prefix, const TString & options, const TString & alt);
 
 	template<class T>
-	bool FindRangeExtremum(T & min, T & max, const TH1 * hist);
+	void FindRangeExtremum(T & min, T & max, T & cand);
 
 	template<class T>
-	bool FindRangeExtremum(T & min, T & max, const TH2 * hist);
+	void FindRangeExtremum(T & min, T & max, const TH1 * hist);
+
+	template<class T>
+	void FindRangeExtremum(T & min, T & max, const TH2 * hist);
+
+	void FindBoundaries(TH1 * h, Double_t & minimum, Double_t & maximum, Bool_t clean_run = kTRUE, Bool_t with_error_bars = kTRUE);
+	void FindBoundaries(TGraph * h, Double_t & minimum, Double_t & maximum, Bool_t clean_run = kTRUE, Bool_t with_error_bars = kTRUE);
 };
 
 Double_t langaufun(Double_t *x, Double_t *par);
@@ -242,18 +167,17 @@ struct smanip
 std::ostream & operator<<(std::ostream & os, const smanip & m);
 
 std::ostream & set_color(std::ostream & s, TermColors c);
-inline smanip color(TermColors n) { return smanip(set_color ,n); }
+inline smanip color(TermColors n) { return smanip(set_color, n); }
 
 
 template<class T>
-bool RootTools::FindRangeExtremum(T & min, T & max, const TH1 * hist)
+void RootTools::FindRangeExtremum(T & min, T & max, const TH1 * hist)
 {
 	int max_rb = hist->GetMaximumBin();
 	T max_r = hist->GetBinContent(max_rb);
 	if (max_r > max)
 	{
 		max = max_r;
-// 		return true;
 	}
 
 	int min_rb = hist->GetMinimumBin();
@@ -261,14 +185,25 @@ bool RootTools::FindRangeExtremum(T & min, T & max, const TH1 * hist)
 	if (min_r < min)
 	{
 		min = min_r;
-// 		return true;
 	}
-
-	return true;
 }
 
 template<class T>
-bool RootTools::FindRangeExtremum(T & min, T & max, const TH2 * hist)
+void RootTools::FindRangeExtremum(T & min, T & max, T & cand)
+{
+	if (cand > max)
+	{
+		max = cand;
+	}
+
+	if (cand < min)
+	{
+		min = cand;
+	}
+}
+
+template<class T>
+void RootTools::FindRangeExtremum(T & min, T & max, const TH2 * hist)
 {
 	int max_rb_x, max_rb_y, max_rb_z;
 	hist->GetMaximumBin(max_rb_x, max_rb_y, max_rb_z);
@@ -279,16 +214,14 @@ bool RootTools::FindRangeExtremum(T & min, T & max, const TH2 * hist)
 	if (max_r > max)
 	{
 		max = max_r;
-// 		return true;
 	}
 
 	T min_r = hist->GetBinContent(min_rb_x, min_rb_y);
 	if (min_r < min)
 	{
 		min = min_r;
-// 		return true;
 	}
-
-	return true;
 }
+
+
 #endif /* ROOTTOOLS_H */

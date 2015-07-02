@@ -8,6 +8,11 @@
 #include <TCanvas.h>
 #include <TColor.h>
 #include <TFile.h>
+
+#include <TGraph.h>
+#include <TGraphErrors.h>
+#include <TGraphAsymmErrors.h>
+
 #include <TF1.h>
 #include <TH1.h>
 #include <TH2.h>
@@ -57,44 +62,39 @@ void RootTools::def(RootTools::PaintFormat & f)
 {
 	PadFormat pf;
 	def(pf);
-	f.marginTop			= pf.marginTop;
-	f.marginRight		= pf.marginRight;
-	f.marginBottom		= pf.marginBottom;
-	f.marginLeft		= pf.marginLeft;
+	f.pf.marginTop			= pf.marginTop;
+	f.pf.marginRight		= pf.marginRight;
+	f.pf.marginBottom		= pf.marginBottom;
+	f.pf.marginLeft			= pf.marginLeft;
 
 	GraphFormat gf;
 	def(gf);
 
-	f.NdivX			= gf.NdivX;
-	f.NdivY			= gf.NdivY;
-	f.Xls			= gf.Xls;
-	f.Xlo			= gf.Xlo;
-	f.Xts			= gf.Xts;
-	f.Xto			= gf.Xto;
-	f.Yls			= gf.Yls;
-	f.Ylo			= gf.Ylo;
-	f.Yts			= gf.Yts;
-	f.Yto			= gf.Yto;
-	f.centerX		= gf.centerX;
-	f.centerY		= gf.centerY;
-	f.optX			= gf.optX;
-	f.optY			= gf.optY;
+	f.gf.NdivX			= gf.NdivX;
+	f.gf.NdivY			= gf.NdivY;
+	f.gf.Xls				= gf.Xls;
+	f.gf.Xlo				= gf.Xlo;
+	f.gf.Xts				= gf.Xts;
+	f.gf.Xto				= gf.Xto;
+	f.gf.Yls				= gf.Yls;
+	f.gf.Ylo				= gf.Ylo;
+	f.gf.Yts				= gf.Yts;
+	f.gf.Yto				= gf.Yto;
+	f.gf.centerX		= gf.centerX;
+	f.gf.centerY		= gf.centerY;
+	f.gf.optX				= gf.optX;
+	f.gf.optY				= gf.optY;
 }
 
-PadFormat RootTools::fpad(PaintFormat f)
-{
-	return { f.marginTop, f.marginRight, f.marginBottom, f.marginLeft };
-}
-
-GraphFormat RootTools::fgraph(PaintFormat f)
-{
-	return {
-		f.NdivX, f.NdivY,
-		f.Xls, f.Xlo, f.Xts, f.Xto,
-		f.Yls, f.Ylo, f.Yts, f.Yto,
-		f.centerX, f.centerY, f.optX, f.optY
-	};
-}
+// PadFormat RootTools::fpad(PaintFormat f)
+// {
+// 	return f.pf;
+// }
+// 
+// GraphFormat RootTools::fgraph(PaintFormat f)
+// {
+// 	return f.gf;
+// }
 
 Bool_t RootTools::gHasImgExportEnabled = kTRUE;
 
@@ -674,23 +674,6 @@ bool RootTools::FindMaxRange(float & range, float & cand)
 	return false;
 }
 
-bool RootTools::FindRangeExtremum(float & min, float & max, float & cand)
-{
-	if (cand > max)
-	{
-		max = cand;
-// 		return true;
-	}
-
-	if (cand < min)
-	{
-		min = cand;
-// 		return true;
-	}
-
-	return false;
-}
-
 void RootTools::MyMath()
 {
 	if (!gROOT->GetListOfFunctions()->FindObject("voigt"))
@@ -1087,20 +1070,106 @@ std::ostream & set_color(std::ostream & s, TermColors c)
 	return s;
 }
 
-std::string RootTools::MergeDrawOptions(TString prefix, TString options, TString alt)
+TString RootTools::MergeOptions(const TString & prefix, const TString & options, const TString & alt)
 {
-	std::string res;
+	TString res;
 	if (options.Length())
 	{
-// 		printf(" --> Using options ");
-		res = (prefix + "," + options).Data();
+		res = (prefix + "," + options);
 	}
 	else
 	{
-// 		printf(" --> Using alt ");
-		res = (prefix + "," + alt).Data();
+		res = (prefix + "," + alt);
 	}
 
-// 	printf("%s\n", res.c_str());
 	return res;
+}
+
+
+/**
+ * @brief Searches for minimal/maximal boundaries of the histogram data which are smaller/bigger than initial values. 
+ * Boundaries search includes errorbars and skips empty bins w/o error bars.
+ * By default, minimal/maximal variables are set to extreme values. If clean_run is reset, then initial values are kept.
+ * 
+ * @param h histogram to scan
+ * @param minimum minimal value stored here
+ * @param maximum maximal value stored here
+ * @param clean_run reinitialize initial values
+ * @param with_error_bars consider error bars for boundaries
+ * @return void
+ */
+void RootTools::FindBoundaries(TH1* h, Double_t & minimum, Double_t & maximum, Bool_t clean_run, Bool_t with_error_bars)
+{
+	Int_t binx, biny, binz;
+	TAxis * fXaxis = h->GetXaxis();
+	TAxis * fYaxis = h->GetYaxis();
+	TAxis * fZaxis = h->GetZaxis();
+
+	Int_t xfirst  = fXaxis->GetFirst();
+	Int_t xlast   = fXaxis->GetLast();
+	Int_t yfirst  = fYaxis->GetFirst();
+	Int_t ylast   = fYaxis->GetLast();
+	Int_t zfirst  = fZaxis->GetFirst();
+	Int_t zlast   = fZaxis->GetLast();
+
+	if (clean_run)
+	{
+		minimum = FLT_MAX;
+		maximum = FLT_MIN;
+	}
+
+	for (binz = zfirst; binz <= zlast; ++binz)
+		for (biny = yfirst; biny <= ylast; ++biny)
+			for (binx = xfirst; binx <= xlast; ++binx)
+			{
+				Double_t bc = h->GetBinContent(binx, biny, binz);
+				Double_t be = 0.0;
+				if (with_error_bars)
+					h->GetBinError(binx, biny, binz);
+				if (bc != 0 || (!with_error_bars or be != 0.0))
+				{
+					if (bc + be > maximum)	maximum = bc + be;
+					if (bc - be < minimum)	minimum = bc - be;
+				}
+			}
+}
+
+/**
+ * @brief Searches for minimal/maximal boundaries of the graph which are smaller/bigger than initial values. 
+ * Boundaries search includes assymetric errorbars.
+ * By default, minimal/maximal variables are set to extreme values. If clean_run is reset, then initial values are kept.
+ * 
+ * @param gr graph to scan
+ * @param minimum minimal value stored here
+ * @param maximum maximal value stored here
+ * @param clean_run reinitialize initial values
+ * @param with_error_bars consider error bars for boundaries
+ * @return void
+ */
+void RootTools::FindBoundaries(TGraph * gr, Double_t & minimum, Double_t & maximum, Bool_t clean_run, Bool_t with_error_bars)
+{
+	Int_t points = gr->GetN();	
+
+	Double_t p_x, p_y;
+
+	if (clean_run)
+	{
+		minimum = FLT_MAX;
+		maximum = FLT_MIN;
+	}
+
+	for (int p = 0; p < points; ++p)
+	{
+		gr->GetPoint(p, p_x, p_y);
+		Double_t greyl = 0.0;
+		Double_t greyh = 0.0;
+		if (with_error_bars)
+		{
+			gr->GetErrorYlow(p);
+			gr->GetErrorYhigh(p);
+		}
+
+		if (p_y + greyh > maximum)	maximum = p_y + greyh;
+		if (p_y - greyl < minimum)	minimum = p_y - greyl;
+	}
 }
