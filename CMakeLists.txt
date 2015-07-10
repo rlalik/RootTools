@@ -8,15 +8,22 @@ set (VERSION_MINOR 1)
 set (VERSION_PATCH 1)
 set(PROJECT_VERSION ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_PATCH})
 
+if(CMAKE_SIZEOF_VOID_P EQUAL 8)
+	set(MyLib lib64)
+else()
+	set(MyLib lib32)
+	set(FIND_LIBRARY_USE_LIB64_PATHS OFF)
+endif()
+
 ##### set paths
 if(WIN32 AND NOT CYGWIN)
-	set(DEF_CMAKE_INSTALL_CMAKEDIR CMake)
+	set(DEF_CMAKE_INSTALL_CMAKEDIR cmake)
 else()
-	set(DEF_CMAKE_INSTALL_CMAKEDIR lib/CMake/${CMAKE_PROJECT_NAME})
+	set(DEF_CMAKE_INSTALL_CMAKEDIR ${MyLib}/cmake/${CMAKE_PROJECT_NAME})
 endif()
 set(CMAKE_INSTALL_CMAKEDIR ${DEF_CMAKE_INSTALL_CMAKEDIR} CACHE PATH "Installation directory for CMake files")
 set(CMAKE_INSTALL_BINDIR "bin" CACHE PATH "object code libraries (lib)")
-set(CMAKE_INSTALL_LIBDIR "lib" CACHE PATH "object code libraries (lib)")
+set(CMAKE_INSTALL_LIBDIR "${MyLib}" CACHE PATH "object code libraries (lib)")
 set(CMAKE_INSTALL_INCLUDEDIR "include" CACHE PATH "object code libraries (lib)")
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
@@ -71,6 +78,7 @@ install(EXPORT ${CMAKE_PROJECT_NAME}Targets
 MESSAGE(STATUS "<<< Configuration >>>
 Project:	${CMAKE_PROJECT_NAME}
 
+Architecture:	${CMAKE_LIBRARY_ARCHITECTURE}
 Build type	${CMAKE_BUILD_TYPE}
 Install path	${CMAKE_INSTALL_PREFIX}
 
