@@ -9,19 +9,19 @@ set (VERSION_PATCH 1)
 set(PROJECT_VERSION ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_PATCH})
 
 if(CMAKE_SIZEOF_VOID_P EQUAL 8)
-	set(ARCH_LIB lib64)
+	set(LIB_SUFFIX 64 CACHE STRING "library dir suffix")
 else()
-	set(ARCH_LIB lib32)
+	set(LIB_SUFFIX 32 CACHE STRING "library dir suffix")
 	set(FIND_LIBRARY_USE_LIB64_PATHS OFF)
 endif()
 
-set(LIB_INSTALL_DIR ${ARCH_LIB} CACHE STRING "library location")
+set(LIB_INSTALL_DIR lib${LIB_SUFFIX} CACHE STRING "library location")
 
 ##### set paths
 if(WIN32 AND NOT CYGWIN)
 	set(DEF_CMAKE_INSTALL_CMAKEDIR cmake)
 else()
-	set(DEF_CMAKE_INSTALL_CMAKEDIR lib/cmake/${CMAKE_PROJECT_NAME})
+	set(DEF_CMAKE_INSTALL_CMAKEDIR ${LIB_INSTALL_DIR}/cmake/${CMAKE_PROJECT_NAME})
 endif()
 set(CMAKE_INSTALL_CMAKEDIR ${DEF_CMAKE_INSTALL_CMAKEDIR} CACHE PATH "Installation directory for CMake files")
 set(CMAKE_INSTALL_BINDIR "bin" CACHE PATH "object code libraries (lib)")
