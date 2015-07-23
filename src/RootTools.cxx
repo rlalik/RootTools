@@ -445,6 +445,38 @@ void RootTools::NiceHistogram(TH1 * h, const TString & text)
 // 		h->GetYaxis()->CenterTitle(centerY);
 }
 
+void RootTools::NiceGraph(TGraph * gr, Int_t ndivx, Int_t ndivy,
+	Float_t xls, Float_t xlo, Float_t xts, Float_t xto,
+	Float_t yls, Float_t ylo, Float_t yts, Float_t yto,
+	Bool_t centerX, Bool_t centerY, Bool_t optX, Bool_t optY)
+{
+
+	gr->GetXaxis()->SetNdivisions(ndivx, optX);
+	gr->GetYaxis()->SetNdivisions(ndivy, optY);
+
+	gr->GetXaxis()->SetLabelSize(xls);
+	gr->GetYaxis()->SetLabelSize(yls);
+	gr->GetXaxis()->SetLabelOffset(xlo);
+	gr->GetYaxis()->SetLabelOffset(ylo);
+
+	gr->GetXaxis()->SetTitleSize(xts);
+	gr->GetYaxis()->SetTitleSize(yts);
+	gr->GetXaxis()->SetTitleOffset(xto);
+	gr->GetYaxis()->SetTitleOffset(yto);
+
+	if (centerX)
+		gr->GetXaxis()->CenterTitle(centerX);
+	if (centerY)
+		gr->GetYaxis()->CenterTitle(centerY);
+}
+
+void RootTools::NiceGraph(TGraph * gr, const GraphFormat & format)
+{
+	NiceGraph(gr, format.NdivX, format.NdivY,
+		format.Xls, format.Xlo, format.Xts, format.Xto, format.Yls, format.Ylo, format.Yts, format.Yto,
+		format.centerX, format.centerY, format.optX, format.optY);
+}
+
 void RootTools::AutoScale(TH1 * hdraw, TH1 * href, Bool_t MinOnZero) {
 	Float_t idrawmax = hdraw->GetBinContent(hdraw->GetMaximumBin());
 	Float_t irefmax = href->GetBinContent(href->GetMaximumBin());

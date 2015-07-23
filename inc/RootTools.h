@@ -94,6 +94,9 @@ namespace RootTools
 	void NiceHistogram(TH1 * h, const GraphFormat & format);
 	void NiceHistogram(TH1 * h, const TString & text);
 
+	void NiceGraph(TGraph * gr, Int_t ndivx, Int_t ndivy, Float_t xls, Float_t xlo, Float_t xts, Float_t xto, Float_t yls, Float_t ylo, Float_t yts, Float_t yto, Bool_t centerX = kFALSE, Bool_t centerY = kFALSE, Bool_t optX = kTRUE, Bool_t optY = kTRUE);
+	void NiceGraph(TGraph * gr, const GraphFormat & format);
+
 	TPaletteAxis * NicePalette(TH2 * h, Float_t ls, Float_t ts=0, Float_t to=0);
 	TPaletteAxis * NoPalette(TH2 * h);
 
