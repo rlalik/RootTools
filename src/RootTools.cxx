@@ -23,6 +23,7 @@
 #include <TPad.h>
 #include <TPaletteAxis.h>
 #include <TStyle.h>
+#include <TSystem.h>
 #include <TVirtualPad.h>
 #include <TROOT.h>
 
@@ -159,7 +160,7 @@ void RootTools::ProgressBar(int num, int max) {
 		std::cout << "." << std::flush;
 	
 	if ((num != 0  and (num+1) % (bp*bw) == 0) or (num == (max-1))) {
-		Float_t num_percent = 100.0*num/(max-1);
+		double num_percent = 100.0*num/(max-1);
 		std::cout << " " << num+1 << " (" << num_percent << "%) " << "\n" << std::flush;
 		newBar = kTRUE;
 	}
@@ -368,7 +369,7 @@ void RootTools::NiceHistogram(TH1 * h, const GraphFormat & format)
 
 void RootTools::NiceHistogram(TH1 * h, const TString & text)
 {
-	TObjArray * arr = text.Tokenize(";,");
+	TObjArray * arr = text.Tokenize(";");
 
 	size_t arr_len = arr->GetEntries();
 
@@ -529,7 +530,7 @@ void RootTools::AutoScale(TH1 * hdraw, TH1 * href1, TH1 * href2) {
 
 	Float_t delta = scalemax - scalemin;
 	scalemax += delta/10.;
-	scalemin -= delta/10.;
+// 	scalemin -= delta/10.;
 // 	scalemax = scalemax < 0. ? scalemax * 1.1 : scalemax * 0.9;
 // 	scalemin = scalemin < 0. ? scalemin * 1.1 : scalemin * 0.9;
 	hdraw->GetYaxis()->SetRangeUser(scalemin, scalemax);
@@ -708,6 +709,8 @@ bool RootTools::FindMaxRange(float & range, float & cand)
 
 void RootTools::MyMath()
 {
+	gSystem->Load("libMathMore");
+
 	if (!gROOT->GetListOfFunctions()->FindObject("voigt"))
 	{
 		new TF1("voigt", "[0] * TMath::Voigt(x - [1], [2], [3], 4)", -1, 1);
@@ -733,7 +736,7 @@ void RootTools::MyMath()
 	}
 }
 
-void RootTools::FetchFitInfo(TF1 * fun, float & mean, float & width, float & sig, float & bkg, TPad * pad)
+void RootTools::FetchFitInfo(TF1 * fun, double & mean, double & width, double & sig, double & bkg, TPad * pad)
 {
 	(void)sig;
 	(void)bkg;
@@ -743,13 +746,13 @@ void RootTools::FetchFitInfo(TF1 * fun, float & mean, float & width, float & sig
 
 	if (strcmp(ftitle, "gaus(0)+gaus(3)") == 0)
 	{
-		Float_t fLambdaFitA1 = fun->GetParameter(0);
-		Float_t fLambdaFitM1 = fun->GetParameter(1);
-		Float_t fLambdaFitS1 = fun->GetParameter(2);
+		double fLambdaFitA1 = fun->GetParameter(0);
+		double fLambdaFitM1 = fun->GetParameter(1);
+		double fLambdaFitS1 = fun->GetParameter(2);
 
-		Float_t fLambdaFitA2 = fun->GetParameter(3);
-		Float_t fLambdaFitM2 = fun->GetParameter(1);
-		Float_t fLambdaFitS2 = fun->GetParameter(5);
+		double fLambdaFitA2 = fun->GetParameter(3);
+		double fLambdaFitM2 = fun->GetParameter(1);
+		double fLambdaFitS2 = fun->GetParameter(5);
 
 		mean = (fLambdaFitA1*fLambdaFitS1*fLambdaFitM1 + fLambdaFitA2*fLambdaFitS2*fLambdaFitM2)/(fLambdaFitA1*fLambdaFitS1 + fLambdaFitA2*fLambdaFitS2);
 		width = (fLambdaFitA1*fLambdaFitS1*fLambdaFitS1 + fLambdaFitA2*fLambdaFitS2*fLambdaFitS2)/(fLambdaFitA1*fLambdaFitS1 + fLambdaFitA2*fLambdaFitS2);
@@ -771,13 +774,13 @@ void RootTools::FetchFitInfo(TF1 * fun, float & mean, float & width, float & sig
 
 	if (strcmp(ftitle, "ggaus") == 0)
 	{
-		Float_t fLambdaFitA1 = fun->GetParameter(0);
-		Float_t fLambdaFitA2 = fun->GetParameter(3);
+		double fLambdaFitA1 = fun->GetParameter(0);
+		double fLambdaFitA2 = fun->GetParameter(3);
 
-		Float_t fLambdaFitM = fun->GetParameter(1);
+		double fLambdaFitM = fun->GetParameter(1);
 
-		Float_t fLambdaFitS1 = TMath::Abs(fun->GetParameter(2));
-		Float_t fLambdaFitS2 = TMath::Abs(fun->GetParameter(5));
+		double fLambdaFitS1 = TMath::Abs(fun->GetParameter(2));
+		double fLambdaFitS2 = TMath::Abs(fun->GetParameter(5));
 
 		mean = fLambdaFitM;
 		/* from Wiki about Voigt profile */
@@ -797,13 +800,13 @@ void RootTools::FetchFitInfo(TF1 * fun, float & mean, float & width, float & sig
 
 	if (strcmp(ftitle, "dgaus") == 0)
 	{
-		Float_t fLambdaFitA1 = fun->GetParameter(0);
-		Float_t fLambdaFitA2 = fun->GetParameter(3);
+		double fLambdaFitA1 = fun->GetParameter(0);
+		double fLambdaFitA2 = fun->GetParameter(3);
 
-		Float_t fLambdaFitM = fun->GetParameter(1);
+		double fLambdaFitM = fun->GetParameter(1);
 
-		Float_t fLambdaFitS1 = TMath::Abs(fun->GetParameter(2));
-		Float_t fLambdaFitS2 = TMath::Abs(fun->GetParameter(4));
+		double fLambdaFitS1 = TMath::Abs(fun->GetParameter(2));
+		double fLambdaFitS2 = TMath::Abs(fun->GetParameter(4));
 
 		mean = fLambdaFitM;
 		/* from Wiki about Voigt profile */
@@ -823,10 +826,10 @@ void RootTools::FetchFitInfo(TF1 * fun, float & mean, float & width, float & sig
 
 	if (strcmp(ftitle, "voigt") == 0)
 	{
-		Float_t fLambdaFitA = fun->GetParameter(0);
-		Float_t fLambdaFitM = fun->GetParameter(1);
-		Float_t fLambdaFitSL = fun->GetParameter(2);
-		Float_t fLambdaFitSG = fun->GetParameter(3);
+		double fLambdaFitA = fun->GetParameter(0);
+		double fLambdaFitM = fun->GetParameter(1);
+		double fLambdaFitSL = fun->GetParameter(2);
+		double fLambdaFitSG = fun->GetParameter(3);
 
 		mean = fLambdaFitM;
 		/* from Wiki about Voigt profile */
@@ -1011,7 +1014,7 @@ bool RootTools::Smooth(TH1 * h)
 // 		h->SetBinContent(1+i, dd[i]);
 	}
 
-	Float_t new_total_integral = h->Integral();
+	double new_total_integral = h->Integral();
 
 // 	printf("scaling by %f", total_integral/new_total_integral);
 	h->Scale(total_integral/new_total_integral);
@@ -1036,8 +1039,8 @@ float RootTools::Normalize(TH1 * h, TH1 * href, bool extended)
 {
 	if (!extended)
 	{
-		Float_t integral_ref = href->Integral();
-		Float_t integral_cur = h->Integral();
+		double integral_ref = href->Integral();
+		double integral_cur = h->Integral();
 
 		h->Scale(integral_ref/integral_cur);
 		return integral_ref/integral_cur;

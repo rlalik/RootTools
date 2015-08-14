@@ -121,7 +121,7 @@ namespace RootTools
 	bool FindMaxRange(float & range, float & cand);
 
 	void MyMath();
-	void FetchFitInfo(TF1 * fun, float & mean, float & width, float & sig, float & bkg, TPad * pad = nullptr);
+	void FetchFitInfo(TF1 * fun, double & mean, double & width, double & sig, double & bkg, TPad * pad = nullptr);
 
 	bool Smooth(TH1 * h);
 	bool Smooth(TH1 * h, int loops);
