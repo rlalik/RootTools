@@ -565,15 +565,30 @@ void RootTools::AutoScaleF(TH1 * hdraw, TH1 * href) {
 	hdraw->GetYaxis()->SetRangeUser(scalemin, scalemax);
 }
 
-Float_t RootTools::calcTotalError(TH1 * h, Int_t bin_l, Int_t bin_u) {
-	Double_t val = 0.0;
-	Double_t val_;
+double RootTools::calcTotalError(TH1 * h, Int_t bin_l, Int_t bin_u)
+{
+	double val = 0.0;
+	double val_;
 	for (Int_t i = bin_l; i <= bin_u; ++i) {
 		val_ = h->GetBinError(i);
 		val += val_ * val_;
 	}
 
 	return TMath::Sqrt(val);
+}
+
+double RootTools::calcTotalError2(TH1 * h, Int_t bin_l, Int_t bin_u)
+{
+	double val = 0.0;
+	double val_;
+	for (Int_t i = bin_l; i <= bin_u; ++i) {
+		val_ = h->GetBinError(i);
+// 		PR(val_);
+		if (val_)
+			val += 1.0 / (val_ * val_);
+	}
+
+	return 1.0 / TMath::Sqrt(val);
 }
 
 TNamed * RootTools::GetObjectFromFile(TFile * f, const TString & name, const TString & suffix) {
@@ -733,6 +748,15 @@ void RootTools::MyMath()
 	if (!gROOT->GetListOfFunctions()->FindObject("aexpo"))
 	{
 		new TF1("aexpo", "[0] * exp([1]*(x-[2]))", -1, 1);
+	}
+
+	if (!gROOT->GetListOfFunctions()->FindObject("angdist"))
+	{
+		TString fbody = "ROOT::Math::legendre([3],x)+([1]*ROOT::Math::legendre([4],x)+[2]*ROOT::Math::legendre([5],x))/[0]";
+		TF1 * legpol = new TF1("angdist", fbody, -1, 1);
+		legpol->SetParameter(3, 0);
+		legpol->SetParameter(4, 2);
+		legpol->SetParameter(5, 4);
 	}
 }
 
