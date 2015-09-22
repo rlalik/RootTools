@@ -142,6 +142,8 @@ namespace RootTools
 
 	void FindBoundaries(TH1 * h, Double_t & minimum, Double_t & maximum, Bool_t clean_run = kTRUE, Bool_t with_error_bars = kTRUE);
 	void FindBoundaries(TGraph * h, Double_t & minimum, Double_t & maximum, Bool_t clean_run = kTRUE, Bool_t with_error_bars = kTRUE);
+
+	bool FileIsNewer(const char * file, const char * reference);
 };
 
 Double_t langaufun(Double_t *x, Double_t *par);

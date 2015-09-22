@@ -29,6 +29,8 @@
 
 #include <iostream>
 
+#include <sys/stat.h>
+
 #define PR(x) std::cout << "++DEBUG: " << #x << " = |" << x << "| (" << __FILE__ << ", " << __LINE__ << ")\n";
 
 using namespace RootTools;
@@ -1231,4 +1233,33 @@ void RootTools::FindBoundaries(TGraph * gr, Double_t & minimum, Double_t & maxim
 		if (p_y + greyh > maximum)	maximum = p_y + greyh;
 		if (p_y - greyl < minimum)	minimum = p_y - greyl;
 	}
+}
+
+bool RootTools::FileIsNewer(const char* file, const char* reference)
+{
+	struct stat st_ref;
+	struct stat st_aux;
+
+	long long int mod_ref = 0;
+	long long int mod_aux = 0;
+
+	if (stat(reference, &st_ref))
+	{
+		perror(reference);
+	}
+	else
+	{
+		mod_ref = (long long)st_ref.st_mtim.tv_sec;
+	}
+
+	if (stat(file, &st_aux))
+	{
+		perror(file);
+	}
+	else
+	{
+		mod_aux = (long long)st_aux.st_mtim.tv_sec;
+	}
+
+	return mod_aux > mod_ref;
 }
