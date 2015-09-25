@@ -28,6 +28,7 @@
 #include <TROOT.h>
 
 #include <iostream>
+#include <sstream>
 
 #include <sys/stat.h>
 
@@ -1243,6 +1244,17 @@ bool RootTools::FileIsNewer(const char* file, const char* reference)
 	long long int mod_ref = 0;
 	long long int mod_aux = 0;
 
+	if (stat(file, &st_aux))
+	{
+		perror(file);
+		if (!reference)	return false;
+	}
+	else
+	{
+		if (!reference)	return true;
+		mod_aux = (long long)st_aux.st_mtim.tv_sec;
+	}
+
 	if (stat(reference, &st_ref))
 	{
 		perror(reference);
@@ -1252,14 +1264,23 @@ bool RootTools::FileIsNewer(const char* file, const char* reference)
 		mod_ref = (long long)st_ref.st_mtim.tv_sec;
 	}
 
-	if (stat(file, &st_aux))
-	{
-		perror(file);
-	}
-	else
-	{
-		mod_aux = (long long)st_aux.st_mtim.tv_sec;
-	}
-
 	return mod_aux > mod_ref;
+}
+
+StringsVector & RootTools::split(const std::string & s, char delim, StringsVector & elems)
+{
+	std::stringstream ss(s);
+	std::string item;
+	while (std::getline(ss, item, delim))
+	{
+		elems.push_back(item);
+	}
+	return elems;
+}
+
+StringsVector RootTools::split(const std::string & s, char delim)
+{
+	StringsVector elems;
+	split(s, delim, elems);
+	return elems;
 }
