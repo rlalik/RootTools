@@ -149,6 +149,8 @@ namespace RootTools
 
 	StringsVector & split(const std::string & s, char delim, StringsVector & elems);
 	StringsVector split(const std::string & s, char delim);
+	
+	double calcFuncErrorBar(TF1 * fun, double x1, double x2, int ccolor = 0);
 };
 
 Double_t langaufun(Double_t *x, Double_t *par);

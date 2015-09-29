@@ -1284,3 +1284,57 @@ StringsVector RootTools::split(const std::string & s, char delim)
 	split(s, delim, elems);
 	return elems;
 }
+
+double RootTools::calcFuncErrorBar(TF1 * fun, double x1, double x2, int ccolor)
+{
+	const size_t npars = fun->GetNpar();
+	double * pars = new double[npars];
+	double * errs = new double[npars];
+
+	// backup original params and errors
+	for (unsigned int i = 0; i < npars; ++i)
+	{
+		pars[i] = fun->GetParameter(i);
+		errs[i] = fun->GetParError(i);
+	}
+
+	// set higher params, integrate
+	for (unsigned int i = 0; i < npars; ++i)
+	{
+		fun->SetParameter(i, pars[i] + errs[i]);
+	}
+	double int_u = fun->Integral(x1, x2);
+
+	if (ccolor)
+	{
+		int color = fun->GetLineColor();
+		fun->SetLineColor(ccolor);
+		fun->DrawCopy("lsame");
+		fun->SetLineColor(color);
+	}
+
+	// set lower params, integrate
+	for (unsigned int i = 0; i < npars; ++i)
+	{
+		fun->SetParameter(i, pars[i] - errs[i]);
+	}
+	double int_l = fun->Integral(x1, x2);
+
+	if (ccolor)
+	{
+		int color = fun->GetLineColor();
+		fun->SetLineColor(ccolor);
+		fun->DrawCopy("lsame");
+		fun->SetLineColor(color);
+	}
+
+	// restore original parameters
+	for (unsigned int i = 0; i < npars; ++i)
+	{
+		fun->SetParameter(i, pars[i]);
+	}
+
+	// calculate error-band area
+	double delta = fabs(int_u - int_l);
+	return delta;
+}
