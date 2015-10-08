@@ -1397,7 +1397,7 @@ void RootTools::calcBinomialErrors(TH1* p, TH1* N)
 			double _n = N->GetBinContent(x, y);
 
 			double sigma = sqrt(_p * (1.0 - _p) * _n);
-			p->SetBinContent(x, y, sigma);
+			p->SetBinError(x, y, sigma);
 		}
 	}
 }
@@ -1416,7 +1416,7 @@ void RootTools::calcBinomialErrors(TH1* p, TH1* q, TH1* N)
 			double _n = N->GetBinContent(x, y);
 
 			double sigma = sqrt(_p * _q * _n);
-			p->SetBinContent(x, y, sigma);
+			p->SetBinError(x, y, sigma);
 		}
 	}
 }
