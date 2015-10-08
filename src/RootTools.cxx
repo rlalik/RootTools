@@ -568,6 +568,21 @@ void RootTools::AutoScaleF(TH1 * hdraw, TH1 * href) {
 	hdraw->GetYaxis()->SetRangeUser(scalemin, scalemax);
 }
 
+std::pair<double, double> RootTools::calcSubstractionError(TF1 * total, TF1 * bkg, double l, double u, bool verbose)
+{
+	double int_b = bkg->Integral(l, u);
+	double int_t = total->Integral(l, u);
+	double s_delta = int_t - int_b;
+	double s_error = sqrt(int_t + int_b);
+
+	printf(" b=%g+-%g, t=%g+-%g, d=%g+-%g, err=%g == %g\n",
+		   int_b, sqrt(int_b), int_t, sqrt(int_t),
+		   s_delta, sqrt(s_delta), s_error, s_error/s_delta * 100);
+
+	return std::pair<double, double>(s_delta, s_error);
+}
+
+
 double RootTools::calcTotalError(TH1 * h, Int_t bin_l, Int_t bin_u)
 {
 	double val = 0.0;
@@ -585,13 +600,11 @@ double RootTools::calcTotalError2(TH1 * h, Int_t bin_l, Int_t bin_u)
 	double val = 0.0;
 	double val_;
 	for (Int_t i = bin_l; i <= bin_u; ++i) {
-		val_ = h->GetBinError(i);
-// 		PR(val_);
-		if (val_)
-			val += 1.0 / (val_ * val_);
+		val_ = h->GetBinContent(i);
+			val += val_;
 	}
 
-	return 1.0 / TMath::Sqrt(val);
+	return TMath::Sqrt(val);
 }
 
 TNamed * RootTools::GetObjectFromFile(TFile * f, const TString & name, const TString & suffix) {
@@ -1285,8 +1298,11 @@ StringsVector RootTools::split(const std::string & s, char delim)
 	return elems;
 }
 
-double RootTools::calcFuncErrorBar(TF1 * fun, double x1, double x2, int ccolor)
+TF1 * RootTools::makeBarOffsetFunction(TF1 * fun, double bar_width_scale)
 {
+	TF1 * f = new TF1();
+	fun->Copy(*f);
+
 	const size_t npars = fun->GetNpar();
 	double * pars = new double[npars];
 	double * errs = new double[npars];
@@ -1301,40 +1317,69 @@ double RootTools::calcFuncErrorBar(TF1 * fun, double x1, double x2, int ccolor)
 	// set higher params, integrate
 	for (unsigned int i = 0; i < npars; ++i)
 	{
-		fun->SetParameter(i, pars[i] + errs[i]);
-	}
-	double int_u = fun->Integral(x1, x2);
-
-	if (ccolor)
-	{
-		int color = fun->GetLineColor();
-		fun->SetLineColor(ccolor);
-		fun->DrawCopy("lsame");
-		fun->SetLineColor(color);
+		f->SetParameter(i, pars[i] + bar_width_scale * errs[i]);
+		f->SetParError(i, errs[i]);
 	}
 
-	// set lower params, integrate
-	for (unsigned int i = 0; i < npars; ++i)
-	{
-		fun->SetParameter(i, pars[i] - errs[i]);
-	}
-	double int_l = fun->Integral(x1, x2);
+	return f;
+}
 
-	if (ccolor)
-	{
-		int color = fun->GetLineColor();
-		fun->SetLineColor(ccolor);
-		fun->DrawCopy("lsame");
-		fun->SetLineColor(color);
-	}
+double RootTools::calcFuncErrorBar(TF1 * fun, double x1, double x2, double bar_width_scale, int ccolor)
+{
 
-	// restore original parameters
-	for (unsigned int i = 0; i < npars; ++i)
-	{
-		fun->SetParameter(i, pars[i]);
-	}
+	TF1 * f_l = makeBarOffsetFunction(fun, -bar_width_scale);
+	TF1 * f_u = makeBarOffsetFunction(fun, +bar_width_scale);
 
-	// calculate error-band area
+	double int_u = f_u->Integral(x1, x2);
+	double int_l = f_l->Integral(x1, x2);
+
+	f_l->Delete();
+	f_u->Delete();
 	double delta = fabs(int_u - int_l);
+
+// 	printf("integrals: l=%g, u=%g, d=%g\n", int_l, int_u, delta);
+	// calculate error-band area
+
 	return delta;
+}
+
+void RootTools::copyRelativeErrors(TH1* destination, TH1* source)
+{
+	Int_t binx, biny, binz;
+	TAxis * fXaxis = destination->GetXaxis();
+	TAxis * fYaxis = destination->GetYaxis();
+	TAxis * fZaxis = destination->GetZaxis();
+
+	Int_t xfirst  = fXaxis->GetFirst();
+	Int_t xlast   = fXaxis->GetLast();
+	Int_t yfirst  = fYaxis->GetFirst();
+	Int_t ylast   = fYaxis->GetLast();
+	Int_t zfirst  = fZaxis->GetFirst();
+	Int_t zlast   = fZaxis->GetLast();
+
+	for (binz = zfirst; binz <= zlast; ++binz)
+		for (biny = yfirst; biny <= ylast; ++biny)
+			for (binx = xfirst; binx <= xlast; ++binx)
+			{
+				Double_t bc = source->GetBinContent(binx, biny, binz);
+				Double_t be = source->GetBinError(binx, biny, binz);
+
+				if (be != 0)
+				{
+					double bc_dst = destination->GetBinContent(binx, biny, binz);
+					double be_dst = destination->GetBinError(binx, biny, binz);
+// 					PR(bc_dst);
+// 					PR(be_dst);
+// 					PR(bc);
+// 					PR(be);
+// 					PR(be/bc);
+// 					PR(destination->GetBinError(binx, biny, binz));
+					destination->SetBinError(binx, biny, binz, bc_dst * be/bc);
+// 					PR(destination->GetBinError(binx, biny, binz));
+				}
+				else
+				{
+					destination->SetBinError(binx, biny, binz, 0.0);
+				}
+			}
 }

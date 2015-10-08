@@ -107,6 +107,7 @@ namespace RootTools
 
 	void AutoScale(TH1 * hdraw, TH1 * href1, TH1 * href2);
 
+	std::pair<double, double> calcSubstractionError(TF1 * total, TF1 * bkg, double l, double u, bool verbose = false);
 	double calcTotalError(TH1 * h, Int_t bin_l, Int_t bin_u);
 	double calcTotalError2(TH1 * h, Int_t bin_l, Int_t bin_u);
 
@@ -149,8 +150,11 @@ namespace RootTools
 
 	StringsVector & split(const std::string & s, char delim, StringsVector & elems);
 	StringsVector split(const std::string & s, char delim);
-	
-	double calcFuncErrorBar(TF1 * fun, double x1, double x2, int ccolor = 0);
+
+	TF1 * makeBarOffsetFunction(TF1 * fun, double bar_width_scale);
+	double calcFuncErrorBar(TF1 * fun, double x1, double x2, double bar_width_scale = 1.0, int ccolor = 0);
+
+	void copyRelativeErrors(TH1 * destination, TH1 * source);
 };
 
 Double_t langaufun(Double_t *x, Double_t *par);
