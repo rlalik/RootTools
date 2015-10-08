@@ -1383,3 +1383,40 @@ void RootTools::copyRelativeErrors(TH1* destination, TH1* source)
 				}
 			}
 }
+
+void RootTools::calcBinomialErrors(TH1* p, TH1* N)
+{
+	size_t bins_x = p->GetXaxis()->GetNbins();
+	size_t bins_y = p->GetYaxis()->GetNbins();
+
+	for (size_t x = 1; x <= bins_x; ++x)
+	{
+		for (size_t y = 1; y <= bins_y; ++y)
+		{
+			double _p = p->GetBinContent(x, y);
+			double _n = N->GetBinContent(x, y);
+
+			double sigma = sqrt(_p * (1.0 - _p) * _n);
+			p->SetBinContent(x, y, sigma);
+		}
+	}
+}
+
+void RootTools::calcBinomialErrors(TH1* p, TH1* q, TH1* N)
+{
+	size_t bins_x = p->GetXaxis()->GetNbins();
+	size_t bins_y = p->GetYaxis()->GetNbins();
+
+	for (size_t x = 1; x <= bins_x; ++x)
+	{
+		for (size_t y = 1; y <= bins_y; ++y)
+		{
+			double _p = p->GetBinContent(x, y);
+			double _q = q->GetBinContent(x, y);
+			double _n = N->GetBinContent(x, y);
+
+			double sigma = sqrt(_p * _q * _n);
+			p->SetBinContent(x, y, sigma);
+		}
+	}
+}

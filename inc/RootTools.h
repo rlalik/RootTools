@@ -155,6 +155,8 @@ namespace RootTools
 	double calcFuncErrorBar(TF1 * fun, double x1, double x2, double bar_width_scale = 1.0, int ccolor = 0);
 
 	void copyRelativeErrors(TH1 * destination, TH1 * source);
+	void calcBinomialErrors(TH1 * p, TH1 * N);
+	void calcBinomialErrors(TH1 * p, TH1 * q, TH1 * N);
 };
 
 Double_t langaufun(Double_t *x, Double_t *par);
