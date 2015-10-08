@@ -157,6 +157,8 @@ namespace RootTools
 	void copyRelativeErrors(TH1 * destination, TH1 * source);
 	void calcBinomialErrors(TH1 * p, TH1 * N);
 	void calcBinomialErrors(TH1 * p, TH1 * q, TH1 * N);
+
+	void calcErrorPropagationDiv(TH1 * h, double val, double err);
 };
 
 Double_t langaufun(Double_t *x, Double_t *par);

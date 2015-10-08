@@ -1420,3 +1420,21 @@ void RootTools::calcBinomialErrors(TH1* p, TH1* q, TH1* N)
 		}
 	}
 }
+
+void RootTools::calcErrorPropagationDiv(TH1* h, double val, double err)
+{
+	size_t bins_x = h->GetXaxis()->GetNbins();
+	size_t bins_y = h->GetYaxis()->GetNbins();
+
+	for (size_t x = 1; x <= bins_x; ++x)
+	{
+		for (size_t y = 1; y <= bins_y; ++y)
+		{
+			double bc = h->GetBinContent(x, y);
+			double be = h->GetBinContent(x, y);
+
+			double sigma = sqrt(val * val * be * be + bc * bc * err * err) / ( val * val );
+			h->SetBinError(x, y, sigma);
+		}
+	}
+}
