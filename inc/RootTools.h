@@ -16,7 +16,17 @@ class TPad;
 class TPaletteAxis;
 class TVirtualPad;
 
+#include <string>
+#include <vector>
+
+struct ErrorsPair
+{
+	double high;
+	double low;
+};
+
 typedef std::vector<std::string> StringsVector;
+typedef std::vector<ErrorsPair> ErrorsChain;
 
 namespace RootTools
 {
@@ -159,6 +169,8 @@ namespace RootTools
 	void calcBinomialErrors(TH1 * p, TH1 * q, TH1 * N);
 
 	void calcErrorPropagationDiv(TH1 * h, double val, double err);
+	ErrorsChain errorsStrToArray(const std::string& errors_str);
+	double calcTotalError(const ErrorsChain & errschain, double & err_u, double & err_l);
 };
 
 Double_t langaufun(Double_t *x, Double_t *par);

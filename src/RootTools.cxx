@@ -29,6 +29,7 @@
 
 #include <iostream>
 #include <sstream>
+#include <string>
 
 #include <sys/stat.h>
 
@@ -1437,4 +1438,88 @@ void RootTools::calcErrorPropagationDiv(TH1* h, double val, double err)
 			h->SetBinError(x, y, sigma);
 		}
 	}
+}
+
+ErrorsChain RootTools::errorsStrToArray(const std::string& errors_str)
+{
+	ErrorsChain errors;
+	size_t global_pos = 0;
+	size_t str_end = errors_str.npos;
+
+	while (global_pos < str_end)
+	{
+		size_t current_pos = global_pos;
+		size_t section_end = errors_str.find('|', global_pos);
+
+		ErrorsPair ep = { 0.0, 0.0 };
+		std::string str_section = errors_str.substr(current_pos, section_end-current_pos);
+
+		size_t control_signs_start = 0;
+		size_t control_signs_stop = 0;
+		size_t str_section_end = str_section.npos;
+
+		while (control_signs_stop != str_section_end)
+		{
+			control_signs_stop = str_section.find_first_of("+-", control_signs_start);
+
+			if (control_signs_start != control_signs_stop)
+			{
+				std::string sub_section = str_section.substr(control_signs_start, control_signs_stop);
+
+				if (control_signs_stop == str_section_end)
+				{
+					if (sub_section.length())
+						ep.low = ep.high = std::stod(sub_section);
+					break;
+				}
+				else
+				{
+					ep.low = ep.high = std::stod(sub_section);
+// 					continue;
+					break;
+				}
+			}
+
+			if (control_signs_start == control_signs_stop)
+			{
+				control_signs_stop = str_section.find_first_of("+-", control_signs_start+1);
+
+				if (str_section[control_signs_start] == '+')
+				{
+					std::string sub_section = str_section.substr(control_signs_start+1, control_signs_stop == str_section_end ? str_section_end : control_signs_stop - 2 - control_signs_start + 1);
+					ep.high = std::stod(sub_section);
+				}
+				if (str_section[control_signs_start] == '-')
+				{
+					std::string sub_section = str_section.substr(control_signs_start+1, control_signs_stop == str_section_end ? str_section_end : control_signs_stop - 2 - control_signs_start + 1);
+					ep.low = std::stod(sub_section);
+				}
+			}
+
+			control_signs_start = control_signs_stop;
+		}
+		errors.push_back(ep);
+		global_pos = section_end+1;
+
+// 		printf(" found errors pair: low=%g    high=%g    from %s\n", ep.low, ep.high, errors_str.c_str());
+
+		if (section_end == str_end)
+			break;
+	}
+
+	return errors;
+}
+
+double RootTools::calcTotalError(const ErrorsChain& errschain, double& err_u, double& err_l)
+{
+    err_u = 0;
+    err_l = 0;
+    for (uint i = 0; i < errschain.size(); ++i)
+    {
+        err_u += errschain[i].high * errschain[i].high;
+        err_l += errschain[i].low * errschain[i].low;
+    }
+
+    err_u = sqrt(err_u);
+    err_l = sqrt(err_l);
 }
