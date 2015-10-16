@@ -576,9 +576,10 @@ std::pair<double, double> RootTools::calcSubstractionError(TF1 * total, TF1 * bk
 	double s_delta = int_t - int_b;
 	double s_error = sqrt(int_t + int_b);
 
-	printf(" b=%g+-%g, t=%g+-%g, d=%g+-%g, err=%g == %g\n",
-		   int_b, sqrt(int_b), int_t, sqrt(int_t),
-		   s_delta, sqrt(s_delta), s_error, s_error/s_delta * 100);
+	if (verbose)
+		printf(" b=%g+-%g, t=%g+-%g, d=%g+-%g, err=%g == %g\n",
+			int_b, sqrt(int_b), int_t, sqrt(int_t),
+			s_delta, sqrt(s_delta), s_error, s_error/s_delta * 100);
 
 	return std::pair<double, double>(s_delta, s_error);
 }
@@ -1325,7 +1326,7 @@ TF1 * RootTools::makeBarOffsetFunction(TF1 * fun, double bar_width_scale)
 	return f;
 }
 
-double RootTools::calcFuncErrorBar(TF1 * fun, double x1, double x2, double bar_width_scale, int ccolor)
+double RootTools::calcFuncErrorBar(TF1 * fun, double x1, double x2, double bar_width_scale, int /*ccolor*/)
 {
 
 	TF1 * f_l = makeBarOffsetFunction(fun, -bar_width_scale);
@@ -1368,10 +1369,10 @@ void RootTools::copyRelativeErrors(TH1* destination, TH1* source)
 				if (be != 0)
 				{
 					double bc_dst = destination->GetBinContent(binx, biny, binz);
-					double be_dst = destination->GetBinError(binx, biny, binz);
+// 					double be_dst = destination->GetBinError(binx, biny, binz);
 // 					PR(bc_dst);
 // 					PR(be_dst);
-// 					PR(bc);
+// 	m				PR(bc);
 // 					PR(be);
 // 					PR(be/bc);
 // 					PR(destination->GetBinError(binx, biny, binz));
@@ -1398,7 +1399,7 @@ void RootTools::calcBinomialErrors(TH1* p, TH1* N)
 			double _n = N->GetBinContent(x, y);
 
 			double sigma = sqrt(_p * (1.0 - _p) * _n);
-			p->SetBinError(x, y, sigma);
+			p->SetBinError(x, y, sigma/_n);
 		}
 	}
 }
@@ -1417,7 +1418,25 @@ void RootTools::calcBinomialErrors(TH1* p, TH1* q, TH1* N)
 			double _n = N->GetBinContent(x, y);
 
 			double sigma = sqrt(_p * _q * _n);
-			p->SetBinError(x, y, sigma);
+			p->SetBinError(x, y, sigma/_n);
+		}
+	}
+}
+
+void RootTools::calcErrorPropagationMult(TH1* h, double val, double err)
+{
+	size_t bins_x = h->GetXaxis()->GetNbins();
+	size_t bins_y = h->GetYaxis()->GetNbins();
+
+	for (size_t x = 1; x <= bins_x; ++x)
+	{
+		for (size_t y = 1; y <= bins_y; ++y)
+		{
+			double bc = h->GetBinContent(x, y) / val;
+			double be = h->GetBinError(x, y) / val;
+
+			double sigma = sqrt(val * val * be * be + bc * bc * err * err);
+			h->SetBinError(x, y, sigma);
 		}
 	}
 }
@@ -1431,8 +1450,8 @@ void RootTools::calcErrorPropagationDiv(TH1* h, double val, double err)
 	{
 		for (size_t y = 1; y <= bins_y; ++y)
 		{
-			double bc = h->GetBinContent(x, y);
-			double be = h->GetBinContent(x, y);
+			double bc = h->GetBinContent(x, y) * val;
+			double be = h->GetBinError(x, y) * val;
 
 			double sigma = sqrt(val * val * be * be + bc * bc * err * err) / ( val * val );
 			h->SetBinError(x, y, sigma);
@@ -1510,7 +1529,7 @@ ErrorsChain RootTools::errorsStrToArray(const std::string& errors_str)
 	return errors;
 }
 
-double RootTools::calcTotalError(const ErrorsChain& errschain, double& err_u, double& err_l)
+void RootTools::calcTotalError(const ErrorsChain& errschain, double& err_u, double& err_l)
 {
     err_u = 0;
     err_l = 0;
@@ -1522,4 +1541,49 @@ double RootTools::calcTotalError(const ErrorsChain& errschain, double& err_u, do
 
     err_u = sqrt(err_u);
     err_l = sqrt(err_l);
+}
+
+double RootTools::calcTotalError(TH1* h)
+{
+	size_t bins_x = h->GetXaxis()->GetNbins();
+	size_t bins_y = h->GetYaxis()->GetNbins();
+
+	double total_err = 0.0;
+	for (size_t x = 1; x <= bins_x; ++x)
+	{
+		for (size_t y = 1; y <= bins_y; ++y)
+		{
+			double err = h->GetBinError(x, y);
+			total_err += err*err;
+			printf(" Adding %g * %g = %g -> %g\n", err, err, err*err, total_err);
+		}
+	}
+
+	printf("  sqrt(%g) = %g\n", total_err, sqrt(total_err));
+	return sqrt(total_err);
+}
+
+TH1 * RootTools::makeRelativeErrorHistogram(TH1* h, bool percentage)
+{
+	TH1 * re = (TH1*)h->Clone();
+	re->Reset();
+
+	size_t bins_x = h->GetXaxis()->GetNbins();
+	size_t bins_y = h->GetYaxis()->GetNbins();
+
+	for (size_t x = 1; x <= bins_x; ++x)
+	{
+		for (size_t y = 1; y <= bins_y; ++y)
+		{
+			double cont = h->GetBinContent(x, y);
+			double err = h->GetBinError(x, y);
+
+			if (percentage)
+				re->SetBinContent(x, y, err/cont * 100.0);
+			else
+				re->SetBinContent(x, y, err/cont);
+		}
+	}
+
+	return re;
 }

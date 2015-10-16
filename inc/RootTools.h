@@ -168,9 +168,13 @@ namespace RootTools
 	void calcBinomialErrors(TH1 * p, TH1 * N);
 	void calcBinomialErrors(TH1 * p, TH1 * q, TH1 * N);
 
+	void calcErrorPropagationMult(TH1 * h, double val, double err);
 	void calcErrorPropagationDiv(TH1 * h, double val, double err);
 	ErrorsChain errorsStrToArray(const std::string& errors_str);
-	double calcTotalError(const ErrorsChain & errschain, double & err_u, double & err_l);
+	double calcTotalError(TH1* h);
+	void calcTotalError(const ErrorsChain & errschain, double & err_u, double & err_l);
+
+	TH1 * makeRelativeErrorHistogram(TH1* h, bool percentage = false);
 };
 
 Double_t langaufun(Double_t *x, Double_t *par);
