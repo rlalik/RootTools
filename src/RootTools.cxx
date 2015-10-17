@@ -758,6 +758,15 @@ void RootTools::MyMath()
 // 		new TF1("ggaus", "[0] * TMath::Voigt(x - [1], [2], [5], 4)", -1, 1);
 	}
 
+	if (!gROOT->GetListOfFunctions()->FindObject("s2gaus"))
+	{
+		new TF1("ggaus",
+				"[0] * ([4] / TMath::Sqrt(2.0 * TMath::Pi() * [2]) * TMath::Exp(-0.5*((x-[1])/[2])**2) + " \
+				"(1.0 - [4]) / TMath::Sqrt(2.0 * TMath::Pi() * [5]) * TMath::Exp(-0.5*((x-[1])/[5])**2)"
+				, -1, 1);
+// 		new TF1("ggaus", "[0] * TMath::Voigt(x - [1], [2], [5], 4)", -1, 1);
+	}
+
 	if (!gROOT->GetListOfFunctions()->FindObject("dgaus"))
 	{
 		new TF1("dgaus", "[0] * TMath::Exp(-0.5*((x-[1])/[2])**2) + [3] * TMath::Exp(-0.5*((x-[1])/[4])**2)", -1, 1);
@@ -1529,18 +1538,22 @@ ErrorsChain RootTools::errorsStrToArray(const std::string& errors_str)
 	return errors;
 }
 
-void RootTools::calcTotalError(const ErrorsChain& errschain, double& err_u, double& err_l)
+double RootTools::calcTotalError(const ErrorsChain& errschain, double& err_u, double& err_l)
 {
-    err_u = 0;
-    err_l = 0;
-    for (uint i = 0; i < errschain.size(); ++i)
-    {
-        err_u += errschain[i].high * errschain[i].high;
-        err_l += errschain[i].low * errschain[i].low;
-    }
+	err_u = 0;
+	err_l = 0;
+	for (uint i = 0; i < errschain.size(); ++i)
+	{
+		err_u += errschain[i].high * errschain[i].high;
+		err_l += errschain[i].low * errschain[i].low;
+	}
 
-    err_u = sqrt(err_u);
-    err_l = sqrt(err_l);
+	double err = sqrt(err_u + err_l);
+
+	err_u = sqrt(err_u);
+	err_l = sqrt(err_l);
+
+	return err;
 }
 
 double RootTools::calcTotalError(TH1* h)
