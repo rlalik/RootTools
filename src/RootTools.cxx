@@ -760,7 +760,7 @@ void RootTools::MyMath()
 
 	if (!gROOT->GetListOfFunctions()->FindObject("s2gaus"))
 	{
-		new TF1("ggaus",
+		new TF1("s2gaus",
 				"[0] * ([4] / TMath::Sqrt(2.0 * TMath::Pi() * [2]) * TMath::Exp(-0.5*((x-[1])/[2])**2) + " \
 				"(1.0 - [4]) / TMath::Sqrt(2.0 * TMath::Pi() * [5]) * TMath::Exp(-0.5*((x-[1])/[5])**2)"
 				, -1, 1);
