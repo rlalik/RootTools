@@ -29,7 +29,7 @@ void ProgressBar::render()
 		new_bar = false;
 	}
 
-	for (long int i = previous_counter; i < current_counter; ++i)
+	for (long int i = cnt_previous; i < cnt_current; ++i)
 	{
 		if (i != 0  and ( (i+1) % point_width ) == 0)
 			std::cout << "." << std::flush;
