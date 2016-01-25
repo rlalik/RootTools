@@ -7,18 +7,32 @@
 using namespace RootTools;
 
 ProgressBar::ProgressBar(long int cnt_limit, int point_width, int bar_width) :
-	cnt_limit(cnt_limit), point_width(point_width), bar_width(bar_width), new_bar(true)
+	cnt_current(0), cnt_previous(0), cnt_limit(cnt_limit),
+	point_width(point_width), bar_width(bar_width), new_bar(true)
 {
 	line_prefix = "==> Processing data ";
 }
 
 void ProgressBar::setProgress(int current_location)
 {
-	current_location += 0;
+	cnt_current = current_location;
+	render();
 }
 
-long int ProgressBar::operator++()
+ProgressBar & ProgressBar::operator++()
 {
+	++cnt_current;
+	render();
+
+	return *this;
+}
+
+ProgressBar ProgressBar::operator++(int)
+{
+	ProgressBar pb(*this);
+	++(*this);
+
+	return pb;
 }
 
 void ProgressBar::render()
@@ -42,4 +56,6 @@ void ProgressBar::render()
 			new_bar = true;
 		}
 	}
+
+	cnt_previous = cnt_current;
 }

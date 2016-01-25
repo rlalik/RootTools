@@ -73,6 +73,7 @@ install(TARGETS RootTools
 install(EXPORT ${CMAKE_PROJECT_NAME}Targets
 	DESTINATION ${CMAKE_INSTALL_CMAKEDIR} COMPONENT dev)
 
+enable_testing()
 add_subdirectory(tests)
 
 # messages
