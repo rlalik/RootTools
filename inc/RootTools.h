@@ -171,8 +171,13 @@ namespace RootTools
 	void calcErrorPropagationMult(TH1 * h, double val, double err);
 	void calcErrorPropagationDiv(TH1 * h, double val, double err);
 	ErrorsChain errorsStrToArray(const std::string& errors_str);
-	double calcTotalError(TH1* h);
+
+	double calcTotalContent(TH1* h, bool verbose = false);
+
+	double calcTotalError(TH1* h, bool verbose = false);
 	double calcTotalError(const ErrorsChain & errschain, double & err_u, double & err_l);
+
+	void calcTotalHistogramValues(TH1* h, double & content, double & error, bool verbose = false);
 
 	TH1 * makeRelativeErrorHistogram(TH1* h, bool percentage = false);
 };
