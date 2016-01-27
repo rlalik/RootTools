@@ -119,7 +119,8 @@ void RootTools::ExportPNG(TCanvas * can, const TString & path) {
 	img.WriteImage(filename);
 }
 
-void RootTools::ExportEPS(TCanvas * can, const TString & path) {
+void RootTools::ExportEPS(TCanvas * can, const TString & path)
+{
 	Int_t oldLevel = gErrorIgnoreLevel;
 	gErrorIgnoreLevel = kWarning;
 	TString filename = path + TString::Format("%s.eps", can->GetName());
@@ -779,11 +780,25 @@ void RootTools::MyMath()
 
 	if (!gROOT->GetListOfFunctions()->FindObject("angdist"))
 	{
-		TString fbody = "ROOT::Math::legendre([3],x)+([1]*ROOT::Math::legendre([4],x)+[2]*ROOT::Math::legendre([5],x))/[0]";
+		TString fbody = "([0]*ROOT::Math::legendre([3],x) + [1]*ROOT::Math::legendre([4],x) + [2]*ROOT::Math::legendre([5],x))/[0]";
 		TF1 * legpol = new TF1("angdist", fbody, -1, 1);
 		legpol->SetParameter(3, 0);
 		legpol->SetParameter(4, 2);
 		legpol->SetParameter(5, 4);
+	}
+
+	if (!gROOT->GetListOfFunctions()->FindObject("csangdist"))
+	{
+		TString fbody = "([0]*ROOT::Math::legendre([3],x) + [1]*ROOT::Math::legendre([4],x) + [2]*ROOT::Math::legendre([5],x)) * [6] * 0.5";
+		TF1 * cslegpol = new TF1("csangdist", fbody, -1, 1);
+		cslegpol->SetParameter(3, 0);
+		cslegpol->SetParameter(4, 2);
+		cslegpol->SetParameter(5, 4);
+
+		cslegpol->SetParameter(0, 1);
+		cslegpol->SetParameter(1, 1);
+		cslegpol->SetParameter(2, 1);
+		cslegpol->SetParameter(6, 1);
 	}
 }
 
@@ -1556,7 +1571,7 @@ double RootTools::calcTotalError(const ErrorsChain& errschain, double& err_u, do
 	return err;
 }
 
-double RootTools::calcTotalError(TH1* h)
+double RootTools::calcTotalError(TH1* h, bool verbose)
 {
 	size_t bins_x = h->GetXaxis()->GetNbins();
 	size_t bins_y = h->GetYaxis()->GetNbins();
@@ -1567,13 +1582,70 @@ double RootTools::calcTotalError(TH1* h)
 		for (size_t y = 1; y <= bins_y; ++y)
 		{
 			double err = h->GetBinError(x, y);
-			total_err += err*err;
-			printf(" Adding %g * %g = %g -> %g\n", err, err, err*err, total_err);
+			if (err != 0.0)
+			{
+				total_err += err*err;
+				if (verbose)
+					printf("[%lu, %lu] Adding %g * %g = %g -> %g\n", x, y, err, err, err*err, total_err);
+			}
 		}
 	}
 
 	printf("  sqrt(%g) = %g\n", total_err, sqrt(total_err));
 	return sqrt(total_err);
+}
+
+double RootTools::calcTotalContent(TH1* h, bool verbose)
+{
+	size_t bins_x = h->GetXaxis()->GetNbins();
+	size_t bins_y = h->GetYaxis()->GetNbins();
+
+	double total_content = 0.0;
+	for (size_t x = 1; x <= bins_x; ++x)
+	{
+		for (size_t y = 1; y <= bins_y; ++y)
+		{
+			double cont = h->GetBinContent(x, y);
+			if (cont != 0.0)
+			{
+				total_content += cont;
+				if (verbose)
+					printf("[%lu, %lu] Adding %g -> %g\n", x, y, cont, total_content);
+			}
+		}
+	}
+
+	printf("  content = %g\n", total_content);
+	return total_content;
+}
+
+void RootTools::calcTotalHistogramValues(TH1* h, double & content, double & error, bool verbose)
+{
+	size_t bins_x = h->GetXaxis()->GetNbins();
+	size_t bins_y = h->GetYaxis()->GetNbins();
+
+	double total_content = 0.0;
+	double total_err = 0.0;
+	for (size_t x = 1; x <= bins_x; ++x)
+	{
+		for (size_t y = 1; y <= bins_y; ++y)
+		{
+			double cont = h->GetBinContent(x, y);
+			double err = h->GetBinError(x, y);
+
+			total_content += cont;
+			total_err += err*err;
+			if (verbose)
+			{
+				printf("[%lu, %lu] V: %g -> %g  E: %g * %g = %g -> %g\n", x, y, cont, total_content, err, err, err*err, total_err);
+			}
+		}
+	}
+
+	content = total_content;
+	error = sqrt(total_err);
+
+	printf("  content = %g  sqrt(%g) = %g\n", content, total_err, error);
 }
 
 TH1 * RootTools::makeRelativeErrorHistogram(TH1* h, bool percentage)
