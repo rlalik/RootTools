@@ -86,11 +86,6 @@ namespace RootTools
 
 	void SaveAndClose(TCanvas * can, TFile * f, Bool_t export_images = kTRUE, const TString & path = "./");
 
-	// Progress Bar
-	extern Int_t gBarPointWidth;
-	extern Int_t gBarWidth;
-	void ProgressBar(int num, int max);
-
 	// Pt and Momentum functions
 	Double_t MtY(Double_t * yP, Double_t * par);
 	Double_t Momentum(Double_t * yP, Double_t * par);

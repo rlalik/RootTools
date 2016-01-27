@@ -109,9 +109,6 @@ Bool_t RootTools::gImgExportPNG = kTRUE;
 Bool_t RootTools::gImgExportEPS = kTRUE;
 Bool_t RootTools::gImgExportPDF = kFALSE;
 
-Int_t RootTools::gBarPointWidth = 50000;
-Int_t RootTools::gBarWidth = 20;
-
 void RootTools::ExportPNG(TCanvas * can, const TString & path) {
 	TASImage img;
 	img.FromPad(can);
@@ -143,32 +140,6 @@ void RootTools::ExportImages(TCanvas * can, const TString & path) {
 	if (gImgExportPNG)	ExportPNG(can, path);
 	if (gImgExportEPS)	ExportEPS(can, path);
 	if (gImgExportPDF)	ExportPDF(can, path);
-}
-
-void RootTools::ProgressBar(int num, int max) {
-	static Int_t bw = 0;
-	static Int_t bp = 0;
-	static Bool_t newBar = kFALSE;
-
-	if (num == 0) {
-		newBar = kTRUE;
-		bp = gBarPointWidth;
-		bw = gBarWidth;
-	}
-
-	if (newBar) {
-		std::cout << "==> Processing data " << std::flush;
-		newBar = kFALSE;
-	}
-	
-	if (num != 0 and ((num+1) % bp) == 0)
-		std::cout << "." << std::flush;
-	
-	if ((num != 0  and (num+1) % (bp*bw) == 0) or (num == (max-1))) {
-		double num_percent = 100.0*(num+1)/(max);
-		std::cout << " " << num+1 << " (" << num_percent << "%) " << "\n" << std::flush;
-		newBar = kTRUE;
-	}
 }
 
 void RootTools::SaveAndClose(TCanvas* can, TFile* f, Bool_t export_images, const TString & path) {
