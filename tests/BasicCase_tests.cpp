@@ -3,9 +3,9 @@
 #include <RootTools.h>
 #include <TH1.h>
 
-class BasicCase : public CPPUNIT_NS::TestFixture
+class BasicCase_tests : public CPPUNIT_NS::TestFixture
 {
-	CPPUNIT_TEST_SUITE( BasicCase );
+	CPPUNIT_TEST_SUITE( BasicCase_tests );
 	CPPUNIT_TEST( MyTest );
 	CPPUNIT_TEST_SUITE_END();
 
@@ -16,13 +16,13 @@ protected:
 	void MyTest();
 };
 
-CPPUNIT_TEST_SUITE_REGISTRATION( BasicCase );
+CPPUNIT_TEST_SUITE_REGISTRATION( BasicCase_tests );
 
-void BasicCase::setUp()
+void BasicCase_tests::setUp()
 {
 }
 
-void BasicCase::MyTest()
+void BasicCase_tests::MyTest()
 {
 // 	float fnum = 2.00001f;
 // // 	CPPUNIT_FAIL("zxczc");
