@@ -43,23 +43,33 @@ namespace RootTools
 		Float_t marginBottom;
 		Float_t marginLeft;
 	};
-	
+
+	struct AxisFormat
+	{
+		enum MODFLAGS {
+			FNONE = 0,
+			NDIV = 1, LS = 2, LO = 4, TS = 8, TO = 16, CL = 32, OPT = 64,
+			FALL = 127
+		};
+
+		AxisFormat();
+		AxisFormat(int ndiv, double ls, double lo, double ts, double to, bool center, bool opt, MODFLAGS flags = FALL);
+
+		Int_t Ndiv;
+		Float_t ls;
+		Float_t lo;
+		Float_t ts;
+		Float_t to;
+		Bool_t center_label;
+		Bool_t optimize;
+
+		int flags;
+		void format(TAxis * ax) const;
+	};
+
 	struct GraphFormat
 	{
-		Int_t NdivX;
-		Int_t NdivY;
-		Float_t Xls;
-		Float_t Xlo;
-		Float_t Xts;
-		Float_t Xto;
-		Float_t Yls;
-		Float_t Ylo;
-		Float_t Yts;
-		Float_t Yto;
-		Bool_t centerX;
-		Bool_t centerY;
-		Bool_t optX;
-		Bool_t optY;
+		AxisFormat x, y, z;
 	};
 
 	struct PaintFormat
@@ -100,6 +110,8 @@ namespace RootTools
 	void NiceHistogram(TH1 * h, Int_t ndivx, Int_t ndivy, Float_t xls, Float_t xlo, Float_t xts, Float_t xto, Float_t yls, Float_t ylo, Float_t yts, Float_t yto, Bool_t centerX = kFALSE, Bool_t centerY = kFALSE, Bool_t optX = kTRUE, Bool_t optY = kTRUE);
 	void NiceHistogram(TH1 * h, const GraphFormat & format);
 	void NiceHistogram(TH1 * h, const TString & text);
+
+	void NiceHistogram(TH2 * h, const GraphFormat & format);
 
 	void NiceGraph(TGraph * gr, Int_t ndivx, Int_t ndivy, Float_t xls, Float_t xlo, Float_t xts, Float_t xto, Float_t yls, Float_t ylo, Float_t yts, Float_t yto, Bool_t centerX = kFALSE, Bool_t centerY = kFALSE, Bool_t optX = kTRUE, Bool_t optY = kTRUE);
 	void NiceGraph(TGraph * gr, const GraphFormat & format);

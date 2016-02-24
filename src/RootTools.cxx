@@ -37,6 +37,28 @@
 
 using namespace RootTools;
 
+AxisFormat::AxisFormat() :
+	Ndiv(505), ls(0.08), lo(0.005), ts(0.08), to(1.0), center_label(false), optimize(true), flags(FALL)
+{
+}
+
+AxisFormat::AxisFormat(int ndiv, double ls, double lo, double ts, double to, bool center, bool opt, MODFLAGS flags) :
+	Ndiv(ndiv), ls(ls), lo(lo), ts(ts), to(to), center_label(center), optimize(opt), flags(flags)
+{
+}
+
+void AxisFormat::format(TAxis * ax) const
+{
+	if (flags | NDIV)	ax->SetNdivisions(Ndiv, optimize);
+	if (flags | LS)		ax->SetLabelSize(ls);
+	if (flags | LO)		ax->SetLabelOffset(lo);
+	if (flags | TS)		ax->SetTitleSize(ts);
+	if (flags | TO)		ax->SetTitleOffset(to);
+
+	if (flags | CL and center_label)
+		ax->CenterTitle(center_label);
+}
+
 void RootTools::def(RootTools::PadFormat & f)
 {
 	f.marginTop			= 0.1;
@@ -47,20 +69,23 @@ void RootTools::def(RootTools::PadFormat & f)
 
 void RootTools::def(RootTools::GraphFormat & f)
 {
-	f.NdivX			= 505;
-	f.NdivY			= 505;
-	f.Xls			= 0.08;
-	f.Xlo			= 0.005;
-	f.Xts			= 0.08;
-	f.Xto			= 0.9;
-	f.Yls			= 0.08;
-	f.Ylo			= 0.005;
-	f.Yts			= 0.08;
-	f.Yto			= 0.55;
-	f.centerX		= kFALSE;
-	f.centerY		= kFALSE;
-	f.optX			= kTRUE;
-	f.optY			= kTRUE;
+	f.x.Ndiv			= 505;
+	f.x.ls				= 0.08;
+	f.x.lo				= 0.005;
+	f.x.ts				= 0.08;
+	f.x.to				= 0.9;
+	f.x.center_label	= kFALSE;
+	f.x.optimize		= kTRUE;
+	f.x.flags			= AxisFormat::FALL;
+
+	f.y.Ndiv			= 505;
+	f.y.ls				= 0.08;
+	f.y.lo				= 0.005;
+	f.y.ts				= 0.08;
+	f.y.to				= 0.55;
+	f.y.center_label	= kFALSE;
+	f.y.optimize		= kTRUE;
+	f.y.flags			= AxisFormat::FALL;
 }
 
 void RootTools::def(RootTools::PaintFormat & f)
@@ -75,31 +100,10 @@ void RootTools::def(RootTools::PaintFormat & f)
 	GraphFormat gf;
 	def(gf);
 
-	f.gf.NdivX			= gf.NdivX;
-	f.gf.NdivY			= gf.NdivY;
-	f.gf.Xls				= gf.Xls;
-	f.gf.Xlo				= gf.Xlo;
-	f.gf.Xts				= gf.Xts;
-	f.gf.Xto				= gf.Xto;
-	f.gf.Yls				= gf.Yls;
-	f.gf.Ylo				= gf.Ylo;
-	f.gf.Yts				= gf.Yts;
-	f.gf.Yto				= gf.Yto;
-	f.gf.centerX		= gf.centerX;
-	f.gf.centerY		= gf.centerY;
-	f.gf.optX				= gf.optX;
-	f.gf.optY				= gf.optY;
+	f.gf.x					= gf.x;
+	f.gf.y					= gf.y;
+	f.gf.z					= gf.z;
 }
-
-// PadFormat RootTools::fpad(PaintFormat f)
-// {
-// 	return f.pf;
-// }
-// 
-// GraphFormat RootTools::fgraph(PaintFormat f)
-// {
-// 	return f.gf;
-// }
 
 Bool_t RootTools::gHasImgExportEnabled = kTRUE;
 
@@ -109,7 +113,8 @@ Bool_t RootTools::gImgExportPNG = kTRUE;
 Bool_t RootTools::gImgExportEPS = kTRUE;
 Bool_t RootTools::gImgExportPDF = kFALSE;
 
-void RootTools::ExportPNG(TCanvas * can, const TString & path) {
+void RootTools::ExportPNG(TCanvas * can, const TString & path)
+{
 	TASImage img;
 	img.FromPad(can);
 	TString filename = path + TString::Format("%s.png", can->GetName());
@@ -125,7 +130,8 @@ void RootTools::ExportEPS(TCanvas * can, const TString & path)
 	gErrorIgnoreLevel = oldLevel;
 }
 
-void RootTools::ExportPDF(TCanvas * can, const TString & path) {
+void RootTools::ExportPDF(TCanvas * can, const TString & path)
+{
 	Int_t oldLevel = gErrorIgnoreLevel;
 	gErrorIgnoreLevel = kWarning;
 	TString filename = path + TString::Format("%s.pdf", can->GetName());
@@ -133,7 +139,8 @@ void RootTools::ExportPDF(TCanvas * can, const TString & path) {
 	gErrorIgnoreLevel = oldLevel;
 }
 
-void RootTools::ExportImages(TCanvas * can, const TString & path) {
+void RootTools::ExportImages(TCanvas * can, const TString & path)
+{
 	if (!gHasImgExportEnabled)
 		return;
 
@@ -142,7 +149,8 @@ void RootTools::ExportImages(TCanvas * can, const TString & path) {
 	if (gImgExportPDF)	ExportPDF(can, path);
 }
 
-void RootTools::SaveAndClose(TCanvas* can, TFile* f, Bool_t export_images, const TString & path) {
+void RootTools::SaveAndClose(TCanvas* can, TFile* f, Bool_t export_images, const TString & path)
+{
 	can->Update();
 
 	if (f)
@@ -155,7 +163,8 @@ void RootTools::SaveAndClose(TCanvas* can, TFile* f, Bool_t export_images, const
 }
 
 //Theta in ptvsRap, von der Chii
-Double_t RootTools::MtY(Double_t* yP, Double_t* par) {
+Double_t RootTools::MtY(Double_t* yP, Double_t* par)
+{
 	// Angle lines
 	Double_t M        = par[0];
 	Double_t ThetaLab = par[1];
@@ -185,7 +194,8 @@ Double_t RootTools::MtY(Double_t* yP, Double_t* par) {
 }
 
 //For lines showing the momentum; done by Malte
-Double_t RootTools::Momentum(Double_t* yP, Double_t* par) {
+Double_t RootTools::Momentum(Double_t* yP, Double_t* par)
+{
 	// Momentum lines
 	Double_t Mass     = par[0];
 	Double_t Momentum = par[1];
@@ -273,11 +283,7 @@ TPaletteAxis * RootTools::NicePalette(TH2 * h, Float_t ls, Float_t ts, Float_t t
 
 	TPaletteAxis * axis = (TPaletteAxis*)h->GetListOfFunctions()->FindObject("palette");
 
-	if (!axis) return NULL;
-
-// 	axis->SetLabelSize(ls);
-// 	axis->SetTitleSize(ts);
-// 	axis->SetTitleOffset(to);
+	if (!axis) return nullptr;
 
 	return axis;
 }
@@ -288,7 +294,7 @@ TPaletteAxis * RootTools::NoPalette(TH2 * h)
 
 	TPaletteAxis * axis = (TPaletteAxis*)h->GetListOfFunctions()->FindObject("palette");
 
-	if (!axis) return NULL;
+	if (!axis) return nullptr;
 
 	(TPaletteAxis*)h->GetListOfFunctions()->Remove(axis);
 	axis->Delete();
@@ -297,7 +303,6 @@ TPaletteAxis * RootTools::NoPalette(TH2 * h)
 
 void RootTools::NicePad(TVirtualPad * pad, Float_t mT, Float_t mR, Float_t mB, Float_t mL)
 {
-// 	pad->Update();
 	pad->SetTopMargin(mT);
 	pad->SetBottomMargin(mB);
 	pad->SetLeftMargin(mL);
@@ -338,9 +343,16 @@ void RootTools::NiceHistogram(TH1 * h, Int_t ndivx, Int_t ndivy,
 
 void RootTools::NiceHistogram(TH1 * h, const GraphFormat & format)
 {
-	RootTools::NiceHistogram(h, format.NdivX, format.NdivY,
-		format.Xls, format.Xlo, format.Xts, format.Xto, format.Yls, format.Ylo, format.Yts, format.Yto,
-		format.centerX, format.centerY, format.optX, format.optY);
+	RootTools::NiceHistogram(h, format.x.Ndiv, format.y.Ndiv,
+		format.x.ls, format.x.lo, format.x.ts, format.x.to, format.y.ls, format.y.lo, format.y.ts, format.y.to,
+		format.x.center_label, format.y.center_label, format.x.optimize, format.y.optimize);
+}
+
+void RootTools::NiceHistogram(TH2 * h, const GraphFormat & format)
+{
+	format.x.format(h->GetXaxis());
+	format.y.format(h->GetYaxis());
+	format.z.format(h->GetZaxis());
 }
 
 void RootTools::NiceHistogram(TH1 * h, const TString & text)
@@ -386,40 +398,6 @@ void RootTools::NiceHistogram(TH1 * h, const TString & text)
 		else
 			printf(" - Unknow arguments %s = %s, skipping them...\n", key.Data(), val.Data());
 	}
-// 	char cmdchar = ((TObjString *)arr->At(0))->String()[0];
-// 	TString tmpstr;
-// 	char testchar = 0;
-// 	bool usecorr = true;
-// 	switch (cmdchar)
-// 	{
-// 		case 'e':
-// 			cdfdata->reffile = ((TObjString *)arr->At(1))->String();
-// 			break;
-// 		case 'c':
-// 			if (((TObjString *)arr->At(1))->String() == "maxy")
-// 			{
-// 				cfg_maxy[ ((TObjString *)arr->At(2))->String().Atoi() ] = ((TObjString *)arr->At(3))->String().Atof();
-// 
-// 					
-// 	h->GetXaxis()->SetNdivisions(ndivx, optX);
-// 	h->GetYaxis()->SetNdivisions(ndivy, optY);
-// 
-// 	h->SetStats(0);
-// 
-// 	h->SetLabelSize(xls, "X");
-// 	h->SetLabelSize(yls, "Y");
-// 	h->SetLabelOffset(xlo, "X");
-// 	h->SetLabelOffset(ylo, "Y");
-// 
-// 	h->SetTitleSize(xts, "X");
-// 	h->SetTitleSize(yts, "Y");
-// 	h->SetTitleOffset(xto, "X");
-// 	h->SetTitleOffset(yto, "Y");
-// 
-// 	if (centerX)
-// 		h->GetXaxis()->CenterTitle(centerX);
-// 	if (centerY)
-// 		h->GetYaxis()->CenterTitle(centerY);
 }
 
 void RootTools::NiceGraph(TGraph * gr, Int_t ndivx, Int_t ndivy,
@@ -427,7 +405,6 @@ void RootTools::NiceGraph(TGraph * gr, Int_t ndivx, Int_t ndivy,
 	Float_t yls, Float_t ylo, Float_t yts, Float_t yto,
 	Bool_t centerX, Bool_t centerY, Bool_t optX, Bool_t optY)
 {
-
 	gr->GetXaxis()->SetNdivisions(ndivx, optX);
 	gr->GetYaxis()->SetNdivisions(ndivy, optY);
 
@@ -449,12 +426,12 @@ void RootTools::NiceGraph(TGraph * gr, Int_t ndivx, Int_t ndivy,
 
 void RootTools::NiceGraph(TGraph * gr, const GraphFormat & format)
 {
-	NiceGraph(gr, format.NdivX, format.NdivY,
-		format.Xls, format.Xlo, format.Xts, format.Xto, format.Yls, format.Ylo, format.Yts, format.Yto,
-		format.centerX, format.centerY, format.optX, format.optY);
+	format.x.format(gr->GetXaxis());
+	format.y.format(gr->GetYaxis());
 }
 
-void RootTools::AutoScale(TH1 * hdraw, TH1 * href, Bool_t MinOnZero) {
+void RootTools::AutoScale(TH1 * hdraw, TH1 * href, Bool_t MinOnZero)
+{
 	Float_t idrawmax = hdraw->GetBinContent(hdraw->GetMaximumBin());
 	Float_t irefmax = href->GetBinContent(href->GetMaximumBin());
 
@@ -475,7 +452,8 @@ void RootTools::AutoScale(TH1 * hdraw, TH1 * href, Bool_t MinOnZero) {
 	hdraw->GetYaxis()->SetRangeUser(scalemin, scalemax);
 }
 
-void RootTools::AutoScale(TH1 * hdraw, TH1 * href1, TH1 * href2) {
+void RootTools::AutoScale(TH1 * hdraw, TH1 * href1, TH1 * href2)
+{
 	if (!href1 and !href2) {
 		return;
 	}
@@ -512,7 +490,8 @@ void RootTools::AutoScale(TH1 * hdraw, TH1 * href1, TH1 * href2) {
 	hdraw->GetYaxis()->SetRangeUser(scalemin, scalemax);
 }
 
-void RootTools::AutoScaleF(TH1 * hdraw, TH1 * href) {
+void RootTools::AutoScaleF(TH1 * hdraw, TH1 * href)
+{
 	TF1 * fdraw	= (TF1*)hdraw->GetListOfFunctions()->At(0);
 	TF1 * fref	= (TF1*)href->GetListOfFunctions()->At(0);
 
@@ -556,7 +535,6 @@ std::pair<double, double> RootTools::calcSubstractionError(TF1 * total, TF1 * bk
 	return std::pair<double, double>(s_delta, s_error);
 }
 
-
 double RootTools::calcTotalError(TH1 * h, Int_t bin_l, Int_t bin_u)
 {
 	double val = 0.0;
@@ -581,7 +559,8 @@ double RootTools::calcTotalError2(TH1 * h, Int_t bin_l, Int_t bin_u)
 	return TMath::Sqrt(val);
 }
 
-TNamed * RootTools::GetObjectFromFile(TFile * f, const TString & name, const TString & suffix) {
+TNamed * RootTools::GetObjectFromFile(TFile * f, const TString & name, const TString & suffix)
+{
 	TNamed * dest = nullptr;
 
 	dest = (TNamed*)f->Get(name);
@@ -596,7 +575,9 @@ TNamed * RootTools::GetObjectFromFile(TFile * f, const TString & name, const TSt
 
 	return dest;
 }
-void RootTools::NicePalette() {
+
+void RootTools::NicePalette()
+{
 	const Int_t NRGBs = 5;
 	const Int_t NCont = 255;
 	Double_t stops[NRGBs] = { 0.00, 0.34, 0.61, 0.84, 1.00 };
