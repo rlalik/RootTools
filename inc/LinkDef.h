@@ -3,9 +3,9 @@
 #pragma link off all globals;
 #pragma link off all classes;
 #pragma link off all functions;
+#pragma link C++ nestedclasses;
 
 #pragma link C++ namespace RootTools;
-#pragma link C++ defined_in RootTools ProgressBar+;
-// #pragma link C++ defined_in RootTools AxisFormat+;
+// #pragma link C++ class ProgressBar;
 
 #endif

@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 2.6)
-project(RootTools C CXX)
+project(RootTools CXX)
 string(TOUPPER "${PROJECT_NAME}" CAPS_PROJECT_NAME)
 
 ##### the version number
@@ -30,7 +30,7 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 ##### find ROOT
 list(APPEND CMAKE_PREFIX_PATH $ENV{ROOTSYS})
 find_package(ROOT QUIET
-	REQUIRED COMPONENTS Core  RIO Net Hist Graf Graf3d Gpad Tree Rint Postscript Matrix Physics MathCore Thread
+	REQUIRED COMPONENTS Core ASImage RIO Net Hist Graf Graf3d Gpad Tree Rint Postscript Matrix Physics MathCore Thread
 	OPTIONAL_COMPONENTS Cling Cint)
 
 include(${ROOT_USE_FILE})
@@ -40,7 +40,7 @@ include_directories(${ROOT_INCLUDE_DIR} inc)
 link_directories(${ROOT_LIBRARIES_DIR})
 
 ##### make targets
-ROOT_STANDARD_LIBRARY_PACKAGE(RootTools DEPENDENCIES ${ROOT_LIBRARIES} ASImage)
+ROOT_STANDARD_LIBRARY_PACKAGE(RootTools DEPENDENCIES ${ROOT_LIBRARIES})
 
 # Export the package for use from the build-tree
 # (this registers the build-tree with a global CMake-registry)

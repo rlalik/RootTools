@@ -92,6 +92,7 @@ namespace RootTools
 	void ExportPNG(TCanvas * can, const TString & path = "./");
 	void ExportEPS(TCanvas * can, const TString & path = "./");
 	void ExportPDF(TCanvas * can, const TString & path = "./");
+    void ExportMacroC(TCanvas * can, const TString & path = "./");
 	void ExportImages(TCanvas * can, const TString & path = "./");
 
 	void SaveAndClose(TCanvas * can, TFile * f, Bool_t export_images = kTRUE, const TString & path = "./");

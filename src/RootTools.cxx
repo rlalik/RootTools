@@ -126,6 +126,7 @@ void RootTools::ExportEPS(TCanvas * can, const TString & path)
 	Int_t oldLevel = gErrorIgnoreLevel;
 	gErrorIgnoreLevel = kWarning;
 	TString filename = path + TString::Format("%s.eps", can->GetName());
+  can->Draw();
 	can->Print(filename);
 	gErrorIgnoreLevel = oldLevel;
 }
@@ -135,6 +136,15 @@ void RootTools::ExportPDF(TCanvas * can, const TString & path)
 	Int_t oldLevel = gErrorIgnoreLevel;
 	gErrorIgnoreLevel = kWarning;
 	TString filename = path + TString::Format("%s.pdf", can->GetName());
+	can->Print(filename);
+	gErrorIgnoreLevel = oldLevel;
+}
+
+void RootTools::ExportMacroC(TCanvas * can, const TString & path)
+{
+	Int_t oldLevel = gErrorIgnoreLevel;
+	gErrorIgnoreLevel = kWarning;
+	TString filename = path + TString::Format("%s.C", can->GetName());
 	can->Print(filename);
 	gErrorIgnoreLevel = oldLevel;
 }

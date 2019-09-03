@@ -13,7 +13,7 @@
 using namespace CppUnit;
 using namespace std;
 
-int main (int argc, char* argv[])
+int main (int argc, char ** argv)
 {
 	std::string testPath = (argc > 1) ? std::string(argv[1]) : "";
 
@@ -37,15 +37,13 @@ int main (int argc, char* argv[])
 		test_to_run = test_to_run->findTest(argv[1]);
 
 	runner.addTest( test_to_run );
-// 	runner.run(controller);
 
 	try
 	{
-		std::cout << "Running tests"  /*<<  testPath*/ << endl;;
-// 		runner.run( controller, testPath );
-		runner.run(controller);
+        std::cout << "Running tests " <<  testPath << endl;
+        runner.run( controller, testPath );
 
-// 		std::cerr << std::endl;
+        std::cerr << std::endl;
 
 		// Print test in a compiler compatible format.
 		CppUnit::CompilerOutputter outputter( &result, std::cerr );
@@ -58,10 +56,6 @@ int main (int argc, char* argv[])
 								<< std::endl;
 		return 0;
 	}
-
-// 	result.runTest();
-// 	results.printResults();
-// 	runner.prin();
 
 	return result.wasSuccessful() ? 0 : 1;
 }
