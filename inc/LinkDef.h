@@ -6,6 +6,5 @@
 #pragma link C++ nestedclasses;
 
 #pragma link C++ namespace RootTools;
-// #pragma link C++ class ProgressBar;
 
 #endif

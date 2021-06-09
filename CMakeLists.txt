@@ -81,10 +81,11 @@ install(FILES
     ${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_PROJECT_NAME}ConfigVersion.cmake
     DESTINATION ${CMAKE_INSTALL_CMAKEDIR})
 
-enable_testing()
-add_subdirectory(tests)
-configure_package_config_file(ctest.cmake.in ctest.cmake
-    INSTALL_DESTINATION ${CMAKE_INSTALL_CMAKEDIR})
+option(ENABLE_TESTING "Build tests" ON)
+if(ENABLE_TESTING)
+    enable_testing()
+    add_subdirectory(tests)
+endif()
 
 # messages
 MESSAGE(STATUS "<<< Configuration >>>
