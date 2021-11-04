@@ -24,7 +24,6 @@ target_link_libraries(
     gtests
     PRIVATE
         RootTools
-        ROOT::Core
         ${GTEST_TRG}
 )
 #target_code_coverage(gtests ALL)

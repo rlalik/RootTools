@@ -2,10 +2,13 @@
 
 #include <TASImage.h>
 #include <TCanvas.h>
+#include <TColor.h>
+#include <TError.h>
 #include <TF1.h>
 #include <TFile.h>
 #include <TGraph.h>
 #include <TLatex.h>
+#include <TMath.h>
 #include <TObjString.h>
 #include <TPaletteAxis.h>
 #include <TROOT.h>

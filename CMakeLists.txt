@@ -1,10 +1,11 @@
-cmake_minimum_required(VERSION 3.16 FATAL_ERROR)
+cmake_minimum_required(VERSION 3.0 FATAL_ERROR)
 project(RootTools
-    VERSION 0.1.3
+    VERSION 0.2.0
     LANGUAGES CXX)
 
 include(GNUInstallDirs)
 
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set(CMAKE_INSTALL_CMAKEDIR ${CMAKE_INSTALL_LIBDIR}/cmake/${CMAKE_PROJECT_NAME})
 
@@ -13,11 +14,20 @@ list(APPEND CMAKE_PREFIX_PATH $ENV{ROOTSYS})
 find_package(ROOT QUIET
     REQUIRED COMPONENTS Core ASImage)
 
+if (ROOT_VERSION_MAJOR VERSION_LESS 6)
+    message(STATUS "Add support for ROOT legacy version ${ROOT_VERSION}")
+    include(${ROOT_USE_FILE})
+    set(ROOT_LIBS_OF_INTREST Core ASImage)
+else()
+    set(ROOT_LIBS_OF_INTREST ROOT::Core ROOT::ASImage)
+endif()
+
 add_library(${CMAKE_PROJECT_NAME} SHARED
     src/RootTools.cxx
     src/ProgressBar.cxx
     src/langaus.C
 )
+
 add_library(RT::${CMAKE_PROJECT_NAME} ALIAS ${CMAKE_PROJECT_NAME})
 
 target_include_directories(${CMAKE_PROJECT_NAME}
@@ -30,8 +40,7 @@ target_include_directories(${CMAKE_PROJECT_NAME}
 
 target_link_libraries(${CMAKE_PROJECT_NAME}
     PUBLIC
-        ROOT::Core
-        ROOT::ASImage
+        ${ROOT_LIBS_OF_INTREST}
 )
 
 set_target_properties(${CMAKE_PROJECT_NAME}
