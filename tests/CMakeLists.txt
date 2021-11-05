@@ -8,7 +8,7 @@ set(tests_SRCS
 )
 
 add_executable(
-    gtests
+    roottools_tests
     ${tests_SRCS}
 )
 
@@ -21,11 +21,11 @@ else()
 endif()
 
 target_link_libraries(
-    gtests
+    roottools_tests
     PRIVATE
         RootTools
         ${GTEST_TRG}
 )
-#target_code_coverage(gtests ALL)
+#target_code_coverage(roottools_tests ALL)
 
-gtest_discover_tests(gtests)
+gtest_discover_tests(roottools_tests)

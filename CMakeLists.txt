@@ -119,7 +119,3 @@ Linker flags:
 Executable      ${CMAKE_EXE_LINKER_FLAGS}
 Module          ${CMAKE_MODULE_LINKER_FLAGS}
 Shared          ${CMAKE_SHARED_LINKER_FLAGS}\n")
-
-foreach(p LIB BIN INCLUDE CMAKE)
-    message(STATUS "CMAKE_INSTALL_${p}DIR: ${CMAKE_INSTALL_${p}DIR}")
-endforeach()
