@@ -14,14 +14,14 @@ class TVirtualPad;
 #include <string>
 #include <vector>
 
+namespace RT
+{
+
 struct ErrorsPair
 {
     double high;
     double low;
 };
-
-namespace RootTools
-{
 
 enum StatFlags
 {
@@ -184,9 +184,9 @@ TF1* makeBarOffsetFunction(TF1* fun, double bar_width_scale);
 double calcFuncErrorBar(TF1* fun, double x1, double x2, double bar_width_scale = 1.0,
                         int ccolor = 0);
 
-void copyRelativeErrors(TH1* destination, TH1* source);
-void calcBinomialErrors(TH1* p, TH1* N);
-void calcBinomialErrors(TH1* p, TH1* q, TH1* N);
+void copyRelativeErrors(TH1* destination, const TH1* source);
+void calcBinomialErrors(TH1* p, const TH1* N);
+void calcBinomialErrors(TH1* p, TH1* q, const TH1* N);
 
 void calcErrorPropagationMult(TH1* h, double val, double err);
 void calcErrorPropagationDiv(TH1* h, double val, double err);
@@ -200,7 +200,7 @@ double calcTotalError(const std::vector<ErrorsPair>& errschain, double& err_u, d
 void calcTotalHistogramValues(TH1* h, double& content, double& error, bool verbose = false);
 
 TH1* makeRelativeErrorHistogram(TH1* h, bool percentage = false);
-}; // namespace RootTools
+}; // namespace RT
 
 Double_t langaufun(Double_t* x, Double_t* par);
 TF1* langaufit(TH1* his, Double_t* fitrange, Double_t* startvalues, Double_t* parlimitslo,
@@ -245,7 +245,7 @@ std::ostream& operator<<(std::ostream& os, const smanip& m);
 std::ostream& set_color(std::ostream& s, TermColors c);
 inline smanip color(TermColors n) { return smanip(set_color, n); }
 
-template <class T> void RootTools::FindRangeExtremum(T& min, T& max, const TH1* hist)
+template <class T> void RT::FindRangeExtremum(T& min, T& max, const TH1* hist)
 {
     int max_rb = hist->GetMaximumBin();
     T max_r = hist->GetBinContent(max_rb);
@@ -256,14 +256,14 @@ template <class T> void RootTools::FindRangeExtremum(T& min, T& max, const TH1* 
     if (min_r < min) { min = min_r; }
 }
 
-template <class T> void RootTools::FindRangeExtremum(T& min, T& max, T& cand)
+template <class T> void RT::FindRangeExtremum(T& min, T& max, T& cand)
 {
     if (cand > max) { max = cand; }
 
     if (cand < min) { min = cand; }
 }
 
-template <class T> void RootTools::FindRangeExtremum(T& min, T& max, const TH2* hist)
+template <class T> void RT::FindRangeExtremum(T& min, T& max, const TH2* hist)
 {
     int max_rb_x, max_rb_y, max_rb_z;
     hist->GetMaximumBin(max_rb_x, max_rb_y, max_rb_z);

@@ -1,5 +1,18 @@
 @PACKAGE_INIT@
 
+check_required_components(Root SmartFactory)
+
 include("${CMAKE_CURRENT_LIST_DIR}/@PROJECT_NAME@Targets.cmake")
 
-check_required_components(@PROJECT_NAME@)
+if (@PROJECT_NAME@_FIND_COMPONENTS)
+  foreach(comp ${@PROJECT_NAME@_FIND_COMPONENTS})
+      if(NOT TARGET RT::${comp})
+      set(@PROJECT_NAME@_${comp}_FOUND 0)
+      if(@PROJECT_NAME@_FIND_REQUIRED_${comp})
+        message(FATAL_ERROR "@PROJECT_NAME@ ${comp} not available.")
+      endif()
+    else()
+      set(@PROJECT_NAME@_${comp}_FOUND 1)
+    endif()
+  endforeach()
+endif()

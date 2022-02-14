@@ -5,24 +5,22 @@
 #define PR(x)                                                                                      \
     std::cout << "++DEBUG: " << #x << " = |" << x << "| (" << __FILE__ << ", " << __LINE__ << ")\n";
 
-using namespace RootTools;
-
-ProgressBar::ProgressBar(long int cnt_limit, int point_width, int bar_width)
+RT::ProgressBar::ProgressBar(long int cnt_limit, int point_width, int bar_width)
     : cnt_current(0), cnt_previous(0), cnt_limit(cnt_limit), point_width(point_width),
       bar_width(bar_width), new_bar(true), new_bar_line(true), bar_p('.'), alarm_p('!')
 {
     line_prefix = "==> Processing data ";
 }
 
-void RootTools::ProgressBar::close() { std::cout << std::endl; }
+void RT::ProgressBar::close() { std::cout << std::endl; }
 
-void ProgressBar::setProgress(int current_location)
+void RT::ProgressBar::setProgress(int current_location)
 {
     cnt_current = current_location;
     render();
 }
 
-ProgressBar& ProgressBar::operator++()
+RT::ProgressBar& RT::ProgressBar::operator++()
 {
     ++cnt_current;
     render();
@@ -30,7 +28,7 @@ ProgressBar& ProgressBar::operator++()
     return *this;
 }
 
-ProgressBar ProgressBar::operator++(int)
+RT::ProgressBar RT::ProgressBar::operator++(int)
 {
     ProgressBar pb(*this);
     ++(*this);
@@ -38,7 +36,7 @@ ProgressBar ProgressBar::operator++(int)
     return pb;
 }
 
-void ProgressBar::render()
+void RT::ProgressBar::render()
 {
     for (long int i = cnt_previous; i < cnt_current; ++i)
     {

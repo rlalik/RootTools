@@ -9,8 +9,8 @@ TEST(tests_Basics, errors_test)
     h->FillRandom("gaus", 1000);
 
     int bins = h->GetXaxis()->GetNbins();
-    double err1 = RootTools::calcTotalError(h, 0, bins);
-    double err2 = RootTools::calcTotalError2(h, 0, bins);
+    double err1 = RT::calcTotalError(h, 0, bins);
+    double err2 = RT::calcTotalError2(h, 0, bins);
 
     printf(" err1 = %g\t err2 = %g\n", err1, err2);
 };

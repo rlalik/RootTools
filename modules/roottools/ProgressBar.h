@@ -3,7 +3,7 @@
 
 #include <string>
 
-namespace RootTools
+namespace RT
 {
 
 class ProgressBar
@@ -42,6 +42,6 @@ protected:
     char alarm_p;
 };
 
-}; // namespace RootTools
+}; // namespace RT
 
 #endif /* PROGRESSBAR_H */
