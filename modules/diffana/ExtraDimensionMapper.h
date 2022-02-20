@@ -28,7 +28,6 @@
 
 class TCanvas;
 class TVirtualPad;
-class ExtraDimensionMapper;
 
 class ExtraDimensionMapper : public TObject, public SmartFactory
 {
@@ -39,21 +38,21 @@ public:
                          const std::string& dir_and_name, SmartFactory* sf);
     virtual ~ExtraDimensionMapper();
 
-    UInt_t getBinsX() const { return nbins_x; }
-    UInt_t getBinsY() const { return nbins_y; }
-    UInt_t getBinsZ() const { return nbins_z; }
+    Int_t getBinsX() const { return nbins_x; }
+    Int_t getBinsY() const { return nbins_y; }
+    Int_t getBinsZ() const { return nbins_z; }
 
-    UInt_t getBin(UInt_t x, UInt_t y = 0, UInt_t z = 0) const;
-    bool reverseBin(UInt_t bin, UInt_t& x) const;
-    bool reverseBin(UInt_t bin, UInt_t& x, UInt_t& y) const;
-    bool reverseBin(UInt_t bin, UInt_t& x, UInt_t& y, UInt_t& z) const;
+    Int_t getBin(Int_t x, Int_t y = 0, Int_t z = 0) const;
+    bool reverseBin(Int_t bin, Int_t& x) const;
+    bool reverseBin(Int_t bin, Int_t& x, Int_t& y) const;
+    bool reverseBin(Int_t bin, Int_t& x, Int_t& y, Int_t& z) const;
 
-    TH1D* get(UInt_t x, UInt_t y = 0, UInt_t z = 0);
+    TH1D* get(Int_t x, Int_t y = 0, Int_t z = 0);
     TH1D* find(Double_t x, Double_t y = 0.0, Double_t z = 0.0);
-    TCanvas* getCanvas(UInt_t x, UInt_t y = 0);
-    TVirtualPad* getPad(UInt_t x, UInt_t y = 0, UInt_t z = 0);
+    TCanvas* getCanvas(Int_t x, Int_t y = 0);
+    TVirtualPad* getPad(Int_t x, Int_t y = 0, Int_t z = 0);
 
-    size_t getNHists() const { return nhists; }
+    constexpr auto getNHists() const -> Int_t { return nhists; }
     TH1* operator[](int n) { return histograms[n]; }
     const TH1* operator[](int n) const { return histograms[n]; }
 
@@ -66,16 +65,16 @@ private:
     void map1D(const AxisCfg& axis);
     void map2D(const AxisCfg& axis);
     void map3D(const AxisCfg& axis);
-    void formatName(char* buff, UInt_t x, UInt_t y = 0, UInt_t z = 0);
-    void formatCanvasName(char* buff, UInt_t x, UInt_t y = 0);
+    void formatName(char* buff, Int_t x, Int_t y = 0, Int_t z = 0);
+    void formatCanvasName(char* buff, Int_t x, Int_t y = 0);
 
 public:
     Dimensions dim;
     AxisCfg axis; //||
     std::string prefix_name;
 
-    UInt_t nhists;
-    UInt_t nbins_x, nbins_y, nbins_z;
+    Int_t nhists;
+    Int_t nbins_x, nbins_y, nbins_z;
 
     TH1* ref_hist;
     TH1D** histograms;  //!

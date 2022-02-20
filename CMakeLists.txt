@@ -4,6 +4,9 @@ project(
   VERSION 0.4.0
   LANGUAGES CXX)
 
+list(APPEND CMAKE_PREFIX_PATH)
+list(APPEND CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake)
+
 include(GNUInstallDirs)
 
 # ==============================================================================
@@ -46,10 +49,15 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set(CMAKE_INSTALL_CMAKEDIR ${CMAKE_INSTALL_LIBDIR}/cmake/${PROJECT_NAME})
 
 # find ROOT
-list(APPEND CMAKE_PREFIX_PATH $ENV{ROOTSYS})
-find_package(ROOT QUIET REQUIRED COMPONENTS Core ASImage)
+set(ROOT_DIR
+    ""
+    CACHE STRING "Path to ROOT installation")
+list(APPEND CMAKE_PREFIX_PATH $ENV{ROOTSYS} ${ROOT_DIR}/cmake)
+list(APPEND CMAKE_MODULE_PATH $ENV{ROOTSYS} ${ROOT_DIR}/cmake)
 
-if(ROOT_VERSION_MAJOR VERSION_LESS 6)
+find_package(ROOT REQUIRED COMPONENTS Core ASImage CONFIG)
+
+if(ROOT_VERSION VERSION_LESS 6)
   message(STATUS "Add support for ROOT legacy version ${ROOT_VERSION}")
   include(${ROOT_USE_FILE})
   set(ROOT_LIBS_OF_INTREST Core ASImage)
@@ -62,7 +70,7 @@ option(RootTools_SHARED_LIBS "Build RootTools shared libs" ON)
 add_compile_options(
   -Wall
   -Wextra
-  # * Wshadow
+  #-Wshadow require higher than c++11
   -Wnon-virtual-dtor
   -Wold-style-cast
   -Wcast-align
@@ -71,11 +79,11 @@ add_compile_options(
   -Wpedantic
   -Wconversion
   -Wsign-conversion
-  -Wmisleading-indentation
-  -Wduplicated-cond
-  -Wduplicated-branches
+  #-Wmisleading-indentation
+  #-Wduplicated-cond
+  #-Wduplicated-branches
   -Wlogical-op
-  -Wnull-dereference
+  #-Wnull-dereference
   -Wuseless-cast
   -Wdouble-promotion
   -Wformat=2)

@@ -90,12 +90,12 @@ ExtraDimensionMapper::~ExtraDimensionMapper()
     delete[] histograms;
 }
 
-UInt_t ExtraDimensionMapper::getBin(UInt_t x, UInt_t y, UInt_t z) const
+Int_t ExtraDimensionMapper::getBin(Int_t x, Int_t y, Int_t z) const
 {
     return z * (nbins_x * nbins_y) + y * nbins_x + x;
 }
 
-bool ExtraDimensionMapper::reverseBin(UInt_t bin, UInt_t& x) const
+bool ExtraDimensionMapper::reverseBin(Int_t bin, Int_t& x) const
 {
     if (dim != DIM1) return false;
     if (bin >= nhists) return false;
@@ -103,7 +103,7 @@ bool ExtraDimensionMapper::reverseBin(UInt_t bin, UInt_t& x) const
     return true;
 }
 
-bool ExtraDimensionMapper::reverseBin(UInt_t bin, UInt_t& x, UInt_t& y) const
+bool ExtraDimensionMapper::reverseBin(Int_t bin, Int_t& x, Int_t& y) const
 {
     if (dim < DIM2)
     {
@@ -117,7 +117,7 @@ bool ExtraDimensionMapper::reverseBin(UInt_t bin, UInt_t& x, UInt_t& y) const
     return true;
 }
 
-bool ExtraDimensionMapper::reverseBin(UInt_t bin, UInt_t& x, UInt_t& y, UInt_t& z) const
+bool ExtraDimensionMapper::reverseBin(Int_t bin, Int_t& x, Int_t& y, Int_t& z) const
 {
     if (dim < DIM3)
     {
@@ -135,7 +135,7 @@ bool ExtraDimensionMapper::reverseBin(UInt_t bin, UInt_t& x, UInt_t& y, UInt_t& 
 void ExtraDimensionMapper::map1D(const AxisCfg& axis)
 {
     char buff[1024];
-    for (UInt_t i = 0; i < nbins_x; ++i)
+    for (Int_t i = 0; i < nbins_x; ++i)
     {
         formatName(buff, i);
         if (axis.bins_arr)
@@ -161,9 +161,9 @@ void ExtraDimensionMapper::map2D(const AxisCfg& axis)
     canvases = new TCanvas*[nbins_x];
 
     char buff[1024];
-    for (UInt_t i = 0; i < nbins_x; ++i)
+    for (Int_t i = 0; i < nbins_x; ++i)
     {
-        for (UInt_t j = 0; j < nbins_y; ++j)
+        for (Int_t j = 0; j < nbins_y; ++j)
         {
             formatName(buff, i, j);
             if (axis.bins_arr)
@@ -188,11 +188,11 @@ void ExtraDimensionMapper::map3D(const AxisCfg& axis)
     canvases = new TCanvas*[nbins_x * nbins_y];
 
     char buff[1024];
-    for (UInt_t i = 0; i < nbins_x; ++i)
+    for (Int_t i = 0; i < nbins_x; ++i)
     {
-        for (UInt_t j = 0; j < nbins_y; ++j)
+        for (Int_t j = 0; j < nbins_y; ++j)
         {
-            for (UInt_t k = 0; k < nbins_z; ++k)
+            for (Int_t k = 0; k < nbins_z; ++k)
             {
                 formatName(buff, i, j, k);
                 if (axis.bins_arr)
@@ -213,7 +213,7 @@ void ExtraDimensionMapper::map3D(const AxisCfg& axis)
     }
 }
 
-void ExtraDimensionMapper::formatName(char* buff, UInt_t x, UInt_t y, UInt_t z)
+void ExtraDimensionMapper::formatName(char* buff, Int_t x, Int_t y, Int_t z)
 {
     char name[200];
     sprintf(name, prefix_name.c_str(), 'h');
@@ -226,7 +226,7 @@ void ExtraDimensionMapper::formatName(char* buff, UInt_t x, UInt_t y, UInt_t z)
         sprintf(buff, "%s_X%02d_Y%02d_Z%02d", name, x, y, z);
 }
 
-void ExtraDimensionMapper::formatCanvasName(char* buff, UInt_t x, UInt_t y)
+void ExtraDimensionMapper::formatCanvasName(char* buff, Int_t x, Int_t y)
 {
     char name[200];
     sprintf(name, prefix_name.c_str(), 'c');
@@ -254,14 +254,14 @@ void ExtraDimensionMapper::formatCanvasName(char* buff, UInt_t x, UInt_t y)
 // 	return *nthis;
 // }
 
-TH1D* ExtraDimensionMapper::get(UInt_t x, UInt_t y, UInt_t z)
+TH1D* ExtraDimensionMapper::get(Int_t x, Int_t y, Int_t z)
 {
     if (x >= nbins_x or y >= nbins_y or z >= nbins_z) return nullptr;
 
     return histograms[getBin(x, y, z)];
 }
 
-TCanvas* ExtraDimensionMapper::getCanvas(UInt_t x, UInt_t y)
+TCanvas* ExtraDimensionMapper::getCanvas(Int_t x, Int_t y)
 {
     if (DIM3 == dim)
     {
@@ -279,9 +279,9 @@ TCanvas* ExtraDimensionMapper::getCanvas(UInt_t x, UInt_t y)
     return canvases[0];
 }
 
-TVirtualPad* ExtraDimensionMapper::getPad(UInt_t x, UInt_t y, UInt_t z)
+TVirtualPad* ExtraDimensionMapper::getPad(Int_t x, Int_t y, Int_t z)
 {
-    TCanvas* can = getCanvas(x, y);
+    auto can = getCanvas(x, y);
 
     if (DIM3 == dim) return can->GetPad(1 + z);
     if (DIM2 == dim) return can->GetPad(1 + y);
@@ -292,7 +292,7 @@ TVirtualPad* ExtraDimensionMapper::getPad(UInt_t x, UInt_t y, UInt_t z)
 
 TH1D* ExtraDimensionMapper::find(Double_t x, Double_t y, Double_t z)
 {
-    UInt_t bin = ref_hist->FindBin(x, y, z);
+    auto bin = ref_hist->FindBin(x, y, z);
     Int_t bx, by, bz;
     ref_hist->GetBinXYZ(bin, bx, by, bz);
     return histograms[getBin(bx - 1, by - 1, bz - 1)];
@@ -300,27 +300,26 @@ TH1D* ExtraDimensionMapper::find(Double_t x, Double_t y, Double_t z)
 
 void ExtraDimensionMapper::Fill1D(Double_t x, Double_t v, Double_t w)
 {
-    UInt_t bin = ref_hist->FindBin(x);
+    auto bin = ref_hist->FindBin(x);
     Int_t bx, by, bz;
     ref_hist->GetBinXYZ(bin, bx, by, bz);
-    if (bx > 0 && bx <= (int)nbins_x) histograms[getBin(bx - 1)]->Fill(v, w);
+    if (bx > 0 && bx <= nbins_x) histograms[getBin(bx - 1)]->Fill(v, w);
 }
 
 void ExtraDimensionMapper::Fill2D(Double_t x, Double_t y, Double_t v, Double_t w)
 {
-    UInt_t bin = ref_hist->FindBin(x, y);
+    auto bin = ref_hist->FindBin(x, y);
     Int_t bx, by, bz;
     ref_hist->GetBinXYZ(bin, bx, by, bz);
-    if (bx > 0 && bx <= (int)nbins_x && by > 0 && by <= (int)nbins_y)
+    if (bx > 0 && bx <= nbins_x && by > 0 && by <= nbins_y)
         histograms[getBin(bx - 1, by - 1)]->Fill(v, w);
 }
 
 void ExtraDimensionMapper::Fill3D(Double_t x, Double_t y, Double_t z, Double_t v, Double_t w)
 {
-    UInt_t bin = ref_hist->FindBin(x, y, z);
+    auto bin = ref_hist->FindBin(x, y, z);
     Int_t bx, by, bz;
     ref_hist->GetBinXYZ(bin, bx, by, bz);
-    if (bx > 0 && bx <= (int)nbins_x && by > 0 && by <= (int)nbins_y && bz > 0 &&
-        bz <= (int)nbins_z)
+    if (bx > 0 && bx <= nbins_x && by > 0 && by <= nbins_y && bz > 0 && bz <= nbins_z)
         histograms[getBin(bx - 1, by - 1, bz - 1)]->Fill(v, w);
 }

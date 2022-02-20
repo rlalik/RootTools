@@ -37,7 +37,7 @@ public:
     TString unit;  // unit for the axis
                    // 	TString title;			// title for the axis
 
-    UInt_t bins;            // number of bins
+    Int_t bins;             // number of bins
     Double_t min;           // minimum axis value
     Double_t max;           // maximum axis value
     Double_t* bins_arr;     //! here one can put custom bins division array

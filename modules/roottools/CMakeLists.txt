@@ -13,7 +13,7 @@ target_include_directories(
   RootTools PUBLIC "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>"
                    "$<INSTALL_INTERFACE:include>/RootTools")
 
-target_link_libraries(RootTools PUBLIC ROOT::Core ROOT::ASImage)
+target_link_libraries(RootTools PUBLIC ${ROOT_LIBS_OF_INTREST})
 
 install(
   TARGETS RootTools

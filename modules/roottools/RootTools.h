@@ -52,7 +52,7 @@ struct AxisFormat
     };
 
     AxisFormat();
-    AxisFormat(int ndiv, double ls, double lo, double ts, double to, bool center, bool opt,
+    AxisFormat(int ndiv, float ls, float lo, float ts, float to, bool center, bool opt,
                MODFLAGS flags = FALL);
 
     Int_t Ndiv;
@@ -102,12 +102,13 @@ Double_t MtY(Double_t* yP, Double_t* par);
 Double_t Momentum(Double_t* yP, Double_t* par);
 
 void DrawAngleLine(Double_t angle, Double_t xdraw = -10, Double_t ydraw = -10,
-                   Double_t angledraw = 02, Int_t color = kBlack, Int_t width = 2, Int_t style = 2);
+                   Float_t angledraw = 02, Color_t color = kBlack, Width_t width = 2,
+                   Style_t style = 2);
 void DrawMomentumLine(Double_t mom, Double_t xdraw = -10, Double_t ydraw = -10,
-                      Double_t angledraw = 02, Int_t color = kBlack, Int_t width = 2,
-                      Int_t style = 2);
-void DrawLine(Double_t x1, Double_t y1, Double_t x2, Double_t y2, Int_t color = kBlack,
-              Int_t width = 1, Int_t style = 1);
+                      Float_t angledraw = 02, Color_t color = kBlack, Width_t width = 2,
+                      Style_t style = 2);
+void DrawLine(Double_t x1, Double_t y1, Double_t x2, Double_t y2, Color_t color = kBlack,
+              Width_t width = 1, Style_t style = 1);
 
 void NicePad(TVirtualPad* pad, Float_t mT, Float_t mR, Float_t mB, Float_t mL);
 void NicePad(TVirtualPad* pad, const PadFormat& format);
@@ -148,8 +149,8 @@ Int_t FindEqualIntegralRange(TH1* hist, Float_t integral, Int_t starting_bin, In
                              Bool_t equal_or_bigger = kTRUE);
 
 void QuickDraw(TVirtualPad* p, TH1* h, const char* opts = "", UChar_t logbits = 0);
-void DrawStats(TVirtualPad* p, TH1* h, UInt_t flags = SF_COUNTS, Float_t x = 0.65, Float_t y = 0.85,
-               Float_t dy = -0.05);
+void DrawStats(TVirtualPad* p, TH1* h, UInt_t flags = SF_COUNTS, Float_t x = 0.65f,
+               Float_t y = 0.85f, Float_t dy = -0.05f);
 
 bool FindMaxRange(float& range, const TH1* hist);
 bool FindMaxRange(float& range, float& cand);
@@ -161,7 +162,7 @@ void FetchFitInfo(TF1* fun, double& mean, double& width, double& sig, double& bk
 bool Smooth(TH1* h);
 bool Smooth(TH1* h, int loops);
 
-float Normalize(TH1* h, TH1* href, bool extended = false);
+auto Normalize(TH1* h, TH1* href, bool extended = false) -> double;
 
 TString MergeOptions(const TString& prefix, const TString& options, const TString& alt);
 

@@ -93,7 +93,7 @@ bool DifferentialContext::configureFromJson(const char* name)
         jsonReadTStringKey(axis, "label", axis_ptrs[i]->label);
         jsonReadTStringKey(axis, "unit", axis_ptrs[i]->unit);
         // 		jsonReadIntKey(axis, "bins", axis_ptrs[i]->bins);
-        jsonReadUIntKey(axis, "bins", axis_ptrs[i]->bins);
+        jsonReadIntKey(axis, "bins", axis_ptrs[i]->bins);
         jsonReadDoubleKey(axis, "min", axis_ptrs[i]->min);
         jsonReadDoubleKey(axis, "max", axis_ptrs[i]->max);
     }
@@ -160,7 +160,7 @@ DifferentialContext& DifferentialContext::operator=(const DifferentialContext& c
 
 bool DifferentialContext::operator==(const DifferentialContext& ctx)
 {
-    bool res = (DistributionContext) * this == (DistributionContext)ctx;
+    bool res = static_cast<DistributionContext>(*this) == static_cast<DistributionContext>(ctx);
     if (!res) return false;
 
     if (this->V != ctx.V)

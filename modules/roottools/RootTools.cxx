@@ -26,13 +26,13 @@
     std::cout << "++DEBUG: " << #x << " = |" << x << "| (" << __FILE__ << ", " << __LINE__ << ")\n";
 
 RT::AxisFormat::AxisFormat()
-    : Ndiv(505), ls(0.08), lo(0.005), ts(0.08), to(1.0), center_label(false), optimize(true),
+    : Ndiv(505), ls(0.08f), lo(0.005f), ts(0.08f), to(1.0f), center_label(false), optimize(true),
       flags(FALL)
 {
 }
 
-RT::AxisFormat::AxisFormat(int ndiv, double ls, double lo, double ts, double to, bool center,
-                           bool opt, MODFLAGS flags)
+RT::AxisFormat::AxisFormat(int ndiv, float ls, float lo, float ts, float to, bool center, bool opt,
+                           MODFLAGS flags)
     : Ndiv(ndiv), ls(ls), lo(lo), ts(ts), to(to), center_label(center), optimize(opt), flags(flags)
 {
 }
@@ -50,28 +50,28 @@ void RT::AxisFormat::format(TAxis* ax) const
 
 void RT::def(RT::PadFormat& f)
 {
-    f.marginTop = 0.1;
-    f.marginRight = 0.1;
-    f.marginBottom = 0.1;
-    f.marginLeft = 0.1;
+    f.marginTop = 0.1f;
+    f.marginRight = 0.1f;
+    f.marginBottom = 0.1f;
+    f.marginLeft = 0.1f;
 }
 
 void RT::def(RT::GraphFormat& f)
 {
     f.x.Ndiv = 505;
-    f.x.ls = 0.08;
-    f.x.lo = 0.005;
-    f.x.ts = 0.08;
-    f.x.to = 0.9;
+    f.x.ls = 0.08f;
+    f.x.lo = 0.005f;
+    f.x.ts = 0.08f;
+    f.x.to = 0.9f;
     f.x.center_label = kFALSE;
     f.x.optimize = kTRUE;
     f.x.flags = AxisFormat::FALL;
 
     f.y.Ndiv = 505;
-    f.y.ls = 0.08;
-    f.y.lo = 0.005;
-    f.y.ts = 0.08;
-    f.y.to = 0.55;
+    f.y.ls = 0.08f;
+    f.y.lo = 0.005f;
+    f.y.ts = 0.08f;
+    f.y.to = 0.55f;
     f.y.center_label = kFALSE;
     f.y.optimize = kTRUE;
     f.y.flags = AxisFormat::FALL;
@@ -214,8 +214,8 @@ Double_t RT::Momentum(Double_t* yP, Double_t* par)
     return pt;
 }
 
-void RT::DrawAngleLine(Double_t angle, Double_t xdraw, Double_t ydraw, Double_t angledraw,
-                       Int_t color, Int_t width, Int_t style)
+void RT::DrawAngleLine(Double_t angle, Double_t xdraw, Double_t ydraw, Float_t angledraw,
+                       Color_t color, Width_t width, Style_t style)
 {
     static TF1* ThetaFunc = new TF1("ThetaFunc", &RT::MtY, -4, 4, 2);
     TString anglelabel = TString::Format("#theta=%2.0f#circ", angle);
@@ -230,7 +230,7 @@ void RT::DrawAngleLine(Double_t angle, Double_t xdraw, Double_t ydraw, Double_t 
 
     TLatex* text = new TLatex;
     text->SetTextFont(42);
-    text->SetTextSize(0.03);
+    text->SetTextSize(0.03f);
     text->SetNDC();
     text->SetTextColor(1);
     text->SetTextAngle(angledraw);
@@ -238,8 +238,8 @@ void RT::DrawAngleLine(Double_t angle, Double_t xdraw, Double_t ydraw, Double_t 
     delete text;
 }
 
-void RT::DrawMomentumLine(Double_t mom, Double_t xdraw, Double_t ydraw, Double_t angledraw,
-                          Int_t color, Int_t width, Int_t style)
+void RT::DrawMomentumLine(Double_t mom, Double_t xdraw, Double_t ydraw, Float_t angledraw,
+                          Color_t color, Width_t width, Style_t style)
 {
     static TF1* PFunc = new TF1("PFunc", &RT::Momentum, -4, 4, 2);
     TString momentumlabel = TString::Format("p=%2.0f MeV/c", mom);
@@ -254,7 +254,7 @@ void RT::DrawMomentumLine(Double_t mom, Double_t xdraw, Double_t ydraw, Double_t
 
     TLatex* text = new TLatex;
     text->SetTextFont(42);
-    text->SetTextSize(0.03);
+    text->SetTextSize(0.03f);
     text->SetNDC();
     text->SetTextColor(1);
     text->SetTextAngle(angledraw);
@@ -263,8 +263,8 @@ void RT::DrawMomentumLine(Double_t mom, Double_t xdraw, Double_t ydraw, Double_t
     delete text;
 }
 
-void RT::DrawLine(Double_t x1, Double_t y1, Double_t x2, Double_t y2, Int_t color, Int_t width,
-                  Int_t style)
+void RT::DrawLine(Double_t x1, Double_t y1, Double_t x2, Double_t y2, Color_t color, Width_t width,
+                  Style_t style)
 {
     TLine* line = new TLine;
     line->SetLineColor(color);
@@ -462,21 +462,21 @@ void RT::AutoScale(TH1* hdraw, TH1* href1, TH1* href2)
         return;
     }
 
-    Float_t idrawmax = hdraw->GetBinContent(hdraw->GetMaximumBin());
-    Float_t iref1max = href1->GetBinContent(href1->GetMaximumBin());
-    Float_t iref2max = href2->GetBinContent(href2->GetMaximumBin());
+    auto idrawmax = hdraw->GetBinContent(hdraw->GetMaximumBin());
+    auto iref1max = href1->GetBinContent(href1->GetMaximumBin());
+    auto iref2max = href2->GetBinContent(href2->GetMaximumBin());
 
-    Float_t idrawmin = hdraw->GetBinContent(hdraw->GetMinimumBin());
-    Float_t iref1min = href1->GetBinContent(href1->GetMinimumBin());
-    Float_t iref2min = href2->GetBinContent(href2->GetMinimumBin());
+    auto idrawmin = hdraw->GetBinContent(hdraw->GetMinimumBin());
+    auto iref1min = href1->GetBinContent(href1->GetMinimumBin());
+    auto iref2min = href2->GetBinContent(href2->GetMinimumBin());
 
-    Float_t irefmax = iref1max > iref2max ? iref1max : iref2max;
-    Float_t irefmin = iref1min < iref2min ? iref1min : iref2min;
+    auto irefmax = iref1max > iref2max ? iref1max : iref2max;
+    auto irefmin = iref1min < iref2min ? iref1min : iref2min;
 
-    Float_t scalemax = irefmax > idrawmax ? irefmax : idrawmax;
-    Float_t scalemin = irefmin < idrawmin ? irefmin : idrawmin;
+    auto scalemax = irefmax > idrawmax ? irefmax : idrawmax;
+    auto scalemin = irefmin < idrawmin ? irefmin : idrawmin;
 
-    Float_t delta = scalemax - scalemin;
+    auto delta = scalemax - scalemin;
     scalemax += delta / 10.;
     // 	scalemin -= delta/10.;
     // 	scalemax = scalemax < 0. ? scalemax * 1.1 : scalemax * 0.9;
@@ -486,11 +486,11 @@ void RT::AutoScale(TH1* hdraw, TH1* href1, TH1* href2)
 
 void RT::AutoScaleF(TH1* hdraw, TH1* href)
 {
-    TF1* fdraw = (TF1*)hdraw->GetListOfFunctions()->At(0);
-    TF1* fref = (TF1*)href->GetListOfFunctions()->At(0);
+    TF1* fdraw = dynamic_cast<TF1*>(hdraw->GetListOfFunctions()->At(0));
+    TF1* fref = dynamic_cast<TF1*>(href->GetListOfFunctions()->At(0));
 
-    Float_t idrawmax;
-    Float_t irefmax;
+    Float_t idrawmax{0.0};
+    Float_t irefmax{0.0};
     if (fdraw)
         idrawmax = fdraw->GetMaximum();
     else
@@ -589,7 +589,7 @@ void RT::NicePalette()
 
 TH1* RT::CloneHistSubrange(TH1* hist, char* name, Int_t bin_min, Int_t bin_max)
 {
-    TH1* h = (TH1*)hist->Clone(name);
+    TH1* h = dynamic_cast<TH1*>(hist->Clone(name));
     h->SetBins(bin_max - bin_min, hist->GetBinLowEdge(bin_min), hist->GetBinLowEdge(bin_max));
 
     for (Int_t i = 0; i < bin_max - bin_min; ++i)
@@ -606,14 +606,14 @@ Int_t RT::FindEqualIntegralRange(TH1* hist, Float_t integral, Int_t starting_bin
 {
     // 	Float_t eq_int = 0;
 
-    Int_t x_min = 0;
-    Int_t x_max = hist->GetNbinsX();
+    auto x_min = 0;
+    auto x_max = hist->GetNbinsX();
 
-    for (Int_t sec_edge = starting_bin + step;; sec_edge += step)
+    for (auto sec_edge = starting_bin + step;; sec_edge += step)
     {
         if ((step > 0 and sec_edge > x_max) or (step < 0 and sec_edge < x_min)) return starting_bin;
 
-        Float_t tmp_int = 0.;
+        auto tmp_int = 0.;
         if (step < 0) tmp_int = hist->Integral(sec_edge, starting_bin);
         if (step > 0) tmp_int = hist->Integral(starting_bin, sec_edge);
 
@@ -644,11 +644,11 @@ void RT::DrawStats(TVirtualPad* p, TH1* h, UInt_t flags, Float_t x, Float_t y, F
 {
     p->cd();
 
-    Float_t next_y = y;
+    auto next_y = y;
 
     TLatex* lt = new TLatex;
     lt->SetNDC();
-    lt->SetTextSize(0.04);
+    lt->SetTextSize(0.04f);
 
     // 	lt->SetTextColor(38);
     // 	lt->SetTextColor(46);
@@ -663,7 +663,7 @@ void RT::DrawStats(TVirtualPad* p, TH1* h, UInt_t flags, Float_t x, Float_t y, F
 bool RT::FindMaxRange(float& range, const TH1* hist)
 {
     int max_rb = hist->GetMaximumBin();
-    float max_r = hist->GetBinContent(max_rb);
+    auto max_r = hist->GetBinContent(max_rb);
     if (max_r > range)
     {
         range = max_r;
@@ -781,7 +781,7 @@ void RT::FetchFitInfo(TF1* fun, double& mean, double& width, double& sig, double
 
         TLatex* latex = new TLatex();
         latex->SetNDC();
-        latex->SetTextSize(0.03);
+        latex->SetTextSize(0.03f);
         latex->DrawLatex(0.57, 0.81, TString::Format("Signal : %s", fun->GetExpFormula().Data()));
         latex->DrawLatex(0.60, 0.77, TString::Format("A=%g", fLambdaFitA1));
         latex->DrawLatex(0.60, 0.74, TString::Format("#mu=%g", fLambdaFitM1));
@@ -812,7 +812,7 @@ void RT::FetchFitInfo(TF1* fun, double& mean, double& width, double& sig, double
 
         TLatex* latex = new TLatex();
         latex->SetNDC();
-        latex->SetTextSize(0.03);
+        latex->SetTextSize(0.03f);
         latex->DrawLatex(0.57, 0.81, TString::Format("Signal : %s", fun->GetTitle()));
         latex->DrawLatex(0.60, 0.77, TString::Format("A=%g", fLambdaFitA1));
         latex->DrawLatex(0.60, 0.74, TString::Format("#sigma=%g", fLambdaFitS1));
@@ -840,7 +840,7 @@ void RT::FetchFitInfo(TF1* fun, double& mean, double& width, double& sig, double
 
         TLatex* latex = new TLatex();
         latex->SetNDC();
-        latex->SetTextSize(0.03);
+        latex->SetTextSize(0.03f);
         latex->DrawLatex(0.57, 0.81, TString::Format("Signal : %s", fun->GetTitle()));
         latex->DrawLatex(0.60, 0.77, TString::Format("A=%g", fLambdaFitA1));
         latex->DrawLatex(0.60, 0.74, TString::Format("#sigma=%g", fLambdaFitS1));
@@ -864,7 +864,7 @@ void RT::FetchFitInfo(TF1* fun, double& mean, double& width, double& sig, double
 
         TLatex* latex = new TLatex();
         latex->SetNDC();
-        latex->SetTextSize(0.03);
+        latex->SetTextSize(0.03f);
         latex->DrawLatex(0.57, 0.81, TString::Format("Signal : %s", fun->GetTitle()));
         latex->DrawLatex(0.60, 0.77, TString::Format("A=%g", fLambdaFitA));
         latex->DrawLatex(0.60, 0.74, TString::Format("#mu=%g", mean));
@@ -964,20 +964,20 @@ bool RT::Smooth(TH1* h)
     // 	TH1 * htmp = h->Clone("_XXYYZZ_temporary");
     // 	h->Delete();
 
-    float mod_ratio = 0.2;
-    float total_integral = h->Integral();
+    auto mod_ratio = 0.2;
+    auto total_integral = h->Integral();
 
-    size_t nbins = h->GetNbinsX();
+    const auto nbins = h->GetNbinsX();
 
-    bool* mark_bins = new bool[nbins];
-    float* bc = new float[nbins];
-    float* fc = new float[nbins];
+    bool mark_bins[nbins];
+    double bc[nbins];
+    double fc[nbins];
     // 	float * dd = new float[nbins];
     // 	float bw = h->GetBinWidth(1);
 
     // 	dd[nbins-1] = 0.;
 
-    for (uint i = 0; i < nbins; ++i)
+    for (auto i = 0; i < nbins; ++i)
     {
         bc[i] = h->GetBinContent(1 + i);
         fc[i] = bc[i];
@@ -986,13 +986,13 @@ bool RT::Smooth(TH1* h)
         // 			dd[i-1] = (bc[i] - bc[i-1])/bw;
     }
 
-    for (uint i = 0; i < nbins; ++i)
+    for (auto i = 0; i < nbins; ++i)
     {
         if (i == 0)
         {
             if ((bc[i] > bc[i + 1]) or (bc[i] < bc[i + 1]))
             {
-                float dif_r = bc[i] - bc[i + 1];
+                auto dif_r = bc[i] - bc[i + 1];
 
                 fc[i] -= (dif_r)*mod_ratio * 0.5;
                 fc[i + 1] += dif_r * mod_ratio * 0.5;
@@ -1002,7 +1002,7 @@ bool RT::Smooth(TH1* h)
         {
             if ((bc[i - 1] < bc[i]) or (bc[i - 1] > bc[i]))
             {
-                float dif_l = bc[i] - bc[i - 1];
+                auto dif_l = bc[i] - bc[i - 1];
 
                 fc[i - 1] += dif_l * mod_ratio * 0.5;
                 fc[i] -= (dif_l)*mod_ratio * 0.5;
@@ -1018,8 +1018,8 @@ bool RT::Smooth(TH1* h)
 
             )
             {
-                float dif_l = bc[i] - bc[i - 1];
-                float dif_r = bc[i] - bc[i + 1];
+                auto dif_l = bc[i] - bc[i - 1];
+                auto dif_r = bc[i] - bc[i + 1];
 
                 fc[i - 1] += dif_l * mod_ratio;
                 fc[i] -= (dif_l + dif_r) * mod_ratio;
@@ -1028,24 +1028,18 @@ bool RT::Smooth(TH1* h)
         }
     }
 
-    for (uint i = 0; i < nbins; ++i)
+    for (auto i = 0; i < nbins; ++i)
     {
-        // 		printf("%03d   : %f  --  %f  ->  %f\n", i, bc[i], fc[i], dd[i]);
+        // printf("%03d   : %f  --  %f  ->  %f\n", i, bc[i], fc[i], dd[i]);
         h->SetBinContent(1 + i, fc[i]);
-        // 		h->SetBinContent(1+i, dd[i]);
+        // h->SetBinContent(1+i, dd[i]);
     }
 
-    double new_total_integral = h->Integral();
+    auto new_total_integral = h->Integral();
 
     // 	printf("scaling by %f", total_integral/new_total_integral);
     h->Scale(total_integral / new_total_integral);
 
-    delete[] bc;
-    delete[] fc;
-    // 	delete [] dd;
-
-    delete[] mark_bins;
-    mark_bins = 0;
     return true;
 }
 
@@ -1057,31 +1051,31 @@ bool RT::Smooth(TH1* h, int loops)
     return true;
 }
 
-float RT::Normalize(TH1* h, TH1* href, bool extended)
+double RT::Normalize(TH1* h, TH1* href, bool extended)
 {
     if (!extended)
     {
-        double integral_ref = href->Integral();
-        double integral_cur = h->Integral();
+        auto integral_ref = href->Integral();
+        auto integral_cur = h->Integral();
 
         h->Scale(integral_ref / integral_cur);
         return integral_ref / integral_cur;
     }
     else
     {
-        TH1* hc_mask = (TH1*)h->Clone("___XXX___hc_mask");
-        TH1* hr_mask = (TH1*)href->Clone("___XXX___hr_mask");
+        TH1* hc_mask = dynamic_cast<TH1*>(h->Clone("___XXX___hc_mask"));
+        TH1* hr_mask = dynamic_cast<TH1*>(href->Clone("___XXX___hr_mask"));
 
         hc_mask->Divide(h);
         hr_mask->Divide(href);
 
-        TH1* hc_temp = (TH1*)h->Clone("___XXX___hc_temp");
-        TH1* hr_temp = (TH1*)href->Clone("___XXX___hr_temp");
+        TH1* hc_temp = dynamic_cast<TH1*>(h->Clone("___XXX___hc_temp"));
+        TH1* hr_temp = dynamic_cast<TH1*>(href->Clone("___XXX___hr_temp"));
 
         hc_temp->Multiply(hr_mask);
         hr_temp->Multiply(hc_mask);
 
-        float scale = Normalize(hc_temp, hr_temp);
+        auto scale = Normalize(hc_temp, hr_temp);
         h->Scale(scale, 0);
 
         hc_mask->Delete();
@@ -1240,13 +1234,13 @@ bool RT::FileIsNewer(const char* file, const char* reference)
     else
     {
         if (!reference) return true;
-        mod_aux = (long long)st_aux.st_mtim.tv_sec;
+        mod_aux = st_aux.st_mtim.tv_sec;
     }
 
     if (stat(reference, &st_ref)) { perror(reference); }
     else
     {
-        mod_ref = (long long)st_ref.st_mtim.tv_sec;
+        mod_ref = st_ref.st_mtim.tv_sec;
     }
 
     return mod_aux > mod_ref;
@@ -1276,19 +1270,19 @@ TF1* RT::makeBarOffsetFunction(TF1* fun, double bar_width_scale)
     TF1* f = new TF1();
     fun->Copy(*f);
 
-    const size_t npars = fun->GetNpar();
+    const auto npars = fun->GetNpar();
     double* pars = new double[npars];
     double* errs = new double[npars];
 
     // backup original params and errors
-    for (unsigned int i = 0; i < npars; ++i)
+    for (auto i = 0; i < npars; ++i)
     {
         pars[i] = fun->GetParameter(i);
         errs[i] = fun->GetParError(i);
     }
 
     // set higher params, integrate
-    for (unsigned int i = 0; i < npars; ++i)
+    for (auto i = 0; i < npars; ++i)
     {
         f->SetParameter(i, pars[i] + bar_width_scale * errs[i]);
         f->SetParError(i, errs[i]);
@@ -1396,12 +1390,12 @@ void RT::calcBinomialErrors(TH1* p, TH1* q, const TH1* N)
 
 void RT::calcErrorPropagationMult(TH1* h, double val, double err)
 {
-    size_t bins_x = h->GetXaxis()->GetNbins();
-    size_t bins_y = h->GetYaxis()->GetNbins();
+    auto bins_x = h->GetXaxis()->GetNbins();
+    auto bins_y = h->GetYaxis()->GetNbins();
 
-    for (size_t x = 1; x <= bins_x; ++x)
+    for (auto x = 1; x <= bins_x; ++x)
     {
-        for (size_t y = 1; y <= bins_y; ++y)
+        for (auto y = 1; y <= bins_y; ++y)
         {
             double bc = h->GetBinContent(x, y) / val;
             double be = h->GetBinError(x, y) / val;
@@ -1414,12 +1408,12 @@ void RT::calcErrorPropagationMult(TH1* h, double val, double err)
 
 void RT::calcErrorPropagationDiv(TH1* h, double val, double err)
 {
-    size_t bins_x = h->GetXaxis()->GetNbins();
-    size_t bins_y = h->GetYaxis()->GetNbins();
+    auto bins_x = h->GetXaxis()->GetNbins();
+    auto bins_y = h->GetYaxis()->GetNbins();
 
-    for (size_t x = 1; x <= bins_x; ++x)
+    for (auto x = 1; x <= bins_x; ++x)
     {
-        for (size_t y = 1; y <= bins_y; ++y)
+        for (auto y = 1; y <= bins_y; ++y)
         {
             double bc = h->GetBinContent(x, y) * val;
             double be = h->GetBinError(x, y) * val;
@@ -1512,13 +1506,13 @@ double RT::calcTotalError(const std::vector<ErrorsPair>& errschain, double& err_
 {
     err_u = 0;
     err_l = 0;
-    for (uint i = 0; i < errschain.size(); ++i)
+    for (auto i = 0ul; i < errschain.size(); ++i)
     {
         err_u += errschain[i].high * errschain[i].high;
         err_l += errschain[i].low * errschain[i].low;
     }
 
-    double err = sqrt(err_u + err_l);
+    auto err = sqrt(err_u + err_l);
 
     err_u = sqrt(err_u);
     err_l = sqrt(err_l);
@@ -1528,20 +1522,20 @@ double RT::calcTotalError(const std::vector<ErrorsPair>& errschain, double& err_
 
 double RT::calcTotalError(TH1* h, bool verbose)
 {
-    size_t bins_x = h->GetXaxis()->GetNbins();
-    size_t bins_y = h->GetYaxis()->GetNbins();
+    auto bins_x = h->GetXaxis()->GetNbins();
+    auto bins_y = h->GetYaxis()->GetNbins();
 
     double total_err = 0.0;
-    for (size_t x = 1; x <= bins_x; ++x)
+    for (auto x = 1; x <= bins_x; ++x)
     {
-        for (size_t y = 1; y <= bins_y; ++y)
+        for (auto y = 1; y <= bins_y; ++y)
         {
-            double err = h->GetBinError(x, y);
+            auto err = h->GetBinError(x, y);
             if (err != 0.0)
             {
                 total_err += err * err;
                 if (verbose)
-                    printf("[%lu, %lu] Adding %g * %g = %g -> %g\n", x, y, err, err, err * err,
+                    printf("[%d, %d] Adding %g * %g = %g -> %g\n", x, y, err, err, err * err,
                            total_err);
             }
         }
@@ -1553,19 +1547,19 @@ double RT::calcTotalError(TH1* h, bool verbose)
 
 double RT::calcTotalContent(TH1* h, bool verbose)
 {
-    size_t bins_x = h->GetXaxis()->GetNbins();
-    size_t bins_y = h->GetYaxis()->GetNbins();
+    auto bins_x = h->GetXaxis()->GetNbins();
+    auto bins_y = h->GetYaxis()->GetNbins();
 
-    double total_content = 0.0;
-    for (size_t x = 1; x <= bins_x; ++x)
+    auto total_content = 0.0;
+    for (auto x = 1; x <= bins_x; ++x)
     {
-        for (size_t y = 1; y <= bins_y; ++y)
+        for (auto y = 1; y <= bins_y; ++y)
         {
-            double cont = h->GetBinContent(x, y);
+            auto cont = h->GetBinContent(x, y);
             if (cont != 0.0)
             {
                 total_content += cont;
-                if (verbose) printf("[%lu, %lu] Adding %g -> %g\n", x, y, cont, total_content);
+                if (verbose) printf("[%d, %d] Adding %g -> %g\n", x, y, cont, total_content);
             }
         }
     }
@@ -1576,23 +1570,23 @@ double RT::calcTotalContent(TH1* h, bool verbose)
 
 void RT::calcTotalHistogramValues(TH1* h, double& content, double& error, bool verbose)
 {
-    size_t bins_x = h->GetXaxis()->GetNbins();
-    size_t bins_y = h->GetYaxis()->GetNbins();
+    auto bins_x = h->GetXaxis()->GetNbins();
+    auto bins_y = h->GetYaxis()->GetNbins();
 
-    double total_content = 0.0;
-    double total_err = 0.0;
-    for (size_t x = 1; x <= bins_x; ++x)
+    auto total_content = 0.0;
+    auto total_err = 0.0;
+    for (auto x = 1; x <= bins_x; ++x)
     {
-        for (size_t y = 1; y <= bins_y; ++y)
+        for (auto y = 1; y <= bins_y; ++y)
         {
-            double cont = h->GetBinContent(x, y);
-            double err = h->GetBinError(x, y);
+            auto cont = h->GetBinContent(x, y);
+            auto err = h->GetBinError(x, y);
 
             total_content += cont;
             total_err += err * err;
             if (verbose)
             {
-                printf("[%lu, %lu] V: %g -> %g  E: %g * %g = %g -> %g\n", x, y, cont, total_content,
+                printf("[%d, %d] V: %g -> %g  E: %g * %g = %g -> %g\n", x, y, cont, total_content,
                        err, err, err * err, total_err);
             }
         }
@@ -1606,15 +1600,15 @@ void RT::calcTotalHistogramValues(TH1* h, double& content, double& error, bool v
 
 TH1* RT::makeRelativeErrorHistogram(TH1* h, bool percentage)
 {
-    TH1* re = (TH1*)h->Clone();
+    TH1* re = dynamic_cast<TH1*>(h->Clone());
     re->Reset();
 
-    size_t bins_x = h->GetXaxis()->GetNbins();
-    size_t bins_y = h->GetYaxis()->GetNbins();
+    auto bins_x = h->GetXaxis()->GetNbins();
+    auto bins_y = h->GetYaxis()->GetNbins();
 
-    for (size_t x = 1; x <= bins_x; ++x)
+    for (auto x = 1; x <= bins_x; ++x)
     {
-        for (size_t y = 1; y <= bins_y; ++y)
+        for (auto y = 1; y <= bins_y; ++y)
         {
             double cont = h->GetBinContent(x, y);
             double err = h->GetBinError(x, y);

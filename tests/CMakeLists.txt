@@ -1,3 +1,9 @@
+# ------------------------------------------------------------------------------
+# gtest
+check_3rd_party_tool(GTest 1.11.0 https://github.com/google/googletest TAG
+                     release-1.11.0 AUTO)
+# ------------------------------------------------------------------------------
+
 find_package(GTest)
 
 # configure_file(tests_config.h.in tests_config.h)

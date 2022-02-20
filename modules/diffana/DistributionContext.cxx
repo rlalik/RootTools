@@ -238,7 +238,7 @@ bool DistributionContext::configureFromJson(const char* name)
         jsonReadTStringKey(axis, "label", axis_ptrs[i]->label);
         jsonReadTStringKey(axis, "unit", axis_ptrs[i]->unit);
         // 		jsonReadIntKey(axis, "bins", axis_ptrs[i]->bins);
-        jsonReadUIntKey(axis, "bins", axis_ptrs[i]->bins);
+        jsonReadIntKey(axis, "bins", axis_ptrs[i]->bins);
         jsonReadDoubleKey(axis, "min", axis_ptrs[i]->min);
         jsonReadDoubleKey(axis, "max", axis_ptrs[i]->max);
     }

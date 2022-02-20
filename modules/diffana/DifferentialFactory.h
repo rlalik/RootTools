@@ -29,7 +29,7 @@
 class DifferentialFactory;
 
 typedef void(FitCallback)(DifferentialFactory* fac, DistributionFactory* sigfac, int fit_res,
-                          TH1* h, uint x_pos, uint y_pos, uint z_pos);
+                          TH1* h, int x_pos, int y_pos, int z_pos);
 
 class DifferentialFactory : public DistributionFactory
 {

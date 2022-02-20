@@ -58,7 +58,7 @@ DistributionFactory& DistributionFactory::operator=(const DistributionFactory& f
 {
     if (this == &fa) return *this;
 
-    (SmartFactory)(*this) = (SmartFactory)fa;
+    static_cast<SmartFactory>(*this) = fa;
     DistributionFactory* nthis = this; // new DistributionFactory(fa.ctx);
 
     nthis->ctx = fa.ctx;
@@ -153,13 +153,15 @@ void DistributionFactory::reinit()
 void DistributionFactory::proceed()
 {
     if (DIM3 == ctx.dim)
-        ((TH3*)hSignalCounter)->Fill(*ctx.x.var, *ctx.y.var, *ctx.z.var, *ctx.var_weight);
+        (dynamic_cast<TH3*>(hSignalCounter))
+            ->Fill(*ctx.x.var, *ctx.y.var, *ctx.z.var, *ctx.var_weight);
 
-    if (DIM2 == ctx.dim) ((TH2*)hSignalCounter)->Fill(*ctx.x.var, *ctx.y.var, *ctx.var_weight);
+    if (DIM2 == ctx.dim)
+        (dynamic_cast<TH2*>(hSignalCounter))->Fill(*ctx.x.var, *ctx.y.var, *ctx.var_weight);
 
-    if (DIM1 == ctx.dim) ((TH1*)hSignalCounter)->Fill(*ctx.x.var, *ctx.var_weight);
+    if (DIM1 == ctx.dim) (hSignalCounter)->Fill(*ctx.x.var, *ctx.var_weight);
 
-    if (DIM0 == ctx.dim) ((TH1*)hSignalCounter)->Fill(*ctx.x.var, *ctx.var_weight);
+    if (DIM0 == ctx.dim) (hSignalCounter)->Fill(*ctx.x.var, *ctx.var_weight);
 
     // 	if (ctx.useClip() and
     // 			*ctx.x.var > ctx.cx.min and *ctx.x.var < ctx.cx.max and
@@ -232,14 +234,14 @@ void DistributionFactory::niceHisto(TVirtualPad* pad, TH1* hist, float mt, float
                                     float yls, float yts, float yto, bool centerY, bool centerX)
 {
     RT::NicePad(pad, mt, mr, mb, ml);
-    RT::NiceHistogram(hist, ndivx, ndivy, xls, 0.005, xts, xto, yls, 0.005, yts, yto, centerY,
+    RT::NiceHistogram(hist, ndivx, ndivy, xls, 0.005f, xts, xto, yls, 0.005f, yts, yto, centerY,
                       centerX);
 }
 
 void DistributionFactory::niceHists(RT::PadFormat pf, const RT::GraphFormat& format)
 {
     RT::NicePad(cSignalCounter->cd(), pf);
-    RT::NiceHistogram((TH2*)hSignalCounter, format);
+    RT::NiceHistogram(dynamic_cast<TH2*>(hSignalCounter), format);
     hSignalCounter->GetYaxis()->CenterTitle(kTRUE);
 }
 
@@ -269,11 +271,12 @@ void DistributionFactory::prepareCanvas(const char* draw_opts)
     cSignalCounter->cd();
     hSignalCounter->Draw(colzopts);
     hSignalCounter->SetMarkerColor(kWhite);
-    hSignalCounter->SetMarkerSize(1.6);
+    hSignalCounter->SetMarkerSize(1.6f);
     hSignalCounter->Sumw2();
 
-    RT::NicePalette((TH2*)hSignalCounter, 0.05);
-    RT::NoPalette((TH2*)hSignalCounter);
+    auto ptr = dynamic_cast<TH2*>(hSignalCounter);
+    RT::NicePalette(ptr, 0.05f);
+    RT::NoPalette(ptr);
     gPad->Update();
 
     // 	float qa_min = 0.;
@@ -397,10 +400,10 @@ void DistributionFactory::prepareCanvas(const char* draw_opts)
 // TODO this two should be moved somewhere else, not in library
 void DistributionFactory::applyAngDists(double a2, double a4, double corr_a2, double corr_a4)
 {
-    const size_t hists_num = 1;
+    const auto hists_num = 1;
     TH1* hist_to_map[hists_num] = {hSignalCounter};
 
-    for (size_t x = 0; x < hists_num; ++x)
+    for (auto x = 0; x < hists_num; ++x)
         applyAngDists(hist_to_map[x], a2, a4, corr_a2, corr_a4);
 }
 
@@ -424,10 +427,10 @@ void DistributionFactory::applyAngDists(TH1* h, double a2, double a4, double cor
         f_corr->SetParameter(2, corr_a4);
     }
 
-    size_t bins_x = h->GetXaxis()->GetNbins();
-    size_t bins_y = h->GetYaxis()->GetNbins();
+    auto bins_x = h->GetXaxis()->GetNbins();
+    auto bins_y = h->GetYaxis()->GetNbins();
 
-    for (size_t x = 1; x <= bins_x; ++x)
+    for (auto x = 1; x <= bins_x; ++x)
     {
         double bin_l = h->GetXaxis()->GetBinLowEdge(x);
         double bin_r = h->GetXaxis()->GetBinUpEdge(x);
@@ -443,7 +446,7 @@ void DistributionFactory::applyAngDists(TH1* h, double a2, double a4, double cor
         }
 
         double scaling_factor = angmap / corr_factor;
-        for (size_t y = 1; y <= bins_y; ++y)
+        for (auto y = 1; y <= bins_y; ++y)
         {
             double tmp_val = h->GetBinContent(x, y);
             h->SetBinContent(x, y, tmp_val * scaling_factor);
@@ -456,10 +459,10 @@ void DistributionFactory::applyAngDists(TH1* h, double a2, double a4, double cor
 // TODO move away
 void DistributionFactory::applyBinomErrors(TH1* N)
 {
-    const size_t hists_num = 1;
+    const auto hists_num = 1;
     TH1* hmap[hists_num] = {hSignalCounter};
 
-    for (size_t x = 0; x < hists_num; ++x)
+    for (auto x = 0; x < hists_num; ++x)
         applyBinomErrors(hmap[x], N);
 }
 
@@ -470,12 +473,12 @@ bool copyHistogram(TH1* src, TH1* dst, bool with_functions)
 {
     if (!src or !dst) return false;
 
-    size_t bins_x = src->GetXaxis()->GetNbins();
-    size_t bins_y = src->GetYaxis()->GetNbins();
+    auto bins_x = src->GetXaxis()->GetNbins();
+    auto bins_y = src->GetYaxis()->GetNbins();
 
-    for (size_t x = 1; x <= bins_x; ++x)
+    for (auto x = 1; x <= bins_x; ++x)
     {
-        for (size_t y = 1; y <= bins_y; ++y)
+        for (auto y = 1; y <= bins_y; ++y)
         {
             double bc = src->GetBinContent(x, y);
             double be = src->GetBinError(x, y);
@@ -492,7 +495,7 @@ bool copyHistogram(TH1* src, TH1* dst, bool with_functions)
         dst->GetListOfFunctions()->Clear();
         for (int i = 0; i < l->GetEntries(); ++i)
         {
-            TF1* f = (TF1*)l->At(i);
+            // TF1* f = dynamic_cast<TF1*>(l->At(i));
             dst->GetListOfFunctions()->Add(l->At(i)->Clone());
         }
     }
