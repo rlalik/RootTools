@@ -183,10 +183,7 @@ Double_t RootTools::MtY(Double_t* yP, Double_t* par)
         return 1000000.0;
 
     if (pt > 0.0 && pt < 10000.0) { return pt; }
-    else
-    {
-        return 1000000.0;
-    }
+    else { return 1000000.0; }
 
     (void)mt;
     return pt;
@@ -208,10 +205,7 @@ Double_t RootTools::Momentum(Double_t* yP, Double_t* par)
     pt = sqrt(pow(Momentum, 2.0) - pow(pz, 2.0));
 
     if (pt > 0.0 && pt < 10000.0) { return pt; }
-    else
-    {
-        return 0.0;
-    }
+    else { return 0.0; }
 
     return pt;
 }
@@ -623,10 +617,7 @@ Int_t RootTools::FindEqualIntegralRange(TH1* hist, Float_t integral, Int_t start
         if (tmp_int > integral)
         {
             if (equal_or_bigger) { return sec_edge; }
-            else
-            {
-                return sec_edge - step;
-            }
+            else { return sec_edge - step; }
         }
     }
 
@@ -1130,10 +1121,7 @@ TString RootTools::MergeOptions(const TString& prefix, const TString& options, c
 {
     TString res;
     if (options.Length()) { res = (prefix + "," + options); }
-    else
-    {
-        res = (prefix + "," + alt);
-    }
+    else { res = (prefix + "," + alt); }
 
     return res;
 }
@@ -1248,10 +1236,7 @@ bool RootTools::FileIsNewer(const char* file, const char* reference)
     }
 
     if (stat(reference, &st_ref)) { perror(reference); }
-    else
-    {
-        mod_ref = (long long)st_ref.st_mtim.tv_sec;
-    }
+    else { mod_ref = (long long)st_ref.st_mtim.tv_sec; }
 
     return mod_aux > mod_ref;
 }
@@ -1355,10 +1340,7 @@ void RootTools::copyRelativeErrors(TH1* destination, TH1* source)
                     destination->SetBinError(binx, biny, binz, bc_dst * be / bc);
                     // 					PR(destination->GetBinError(binx, biny, binz));
                 }
-                else
-                {
-                    destination->SetBinError(binx, biny, binz, 0.0);
-                }
+                else { destination->SetBinError(binx, biny, binz, 0.0); }
             }
 }
 
