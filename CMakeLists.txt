@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.0 FATAL_ERROR)
 project(RootTools
-    VERSION 0.2.1
+    VERSION 0.2.2
     LANGUAGES CXX)
 
 include(GNUInstallDirs)

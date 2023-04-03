@@ -1,4 +1,18 @@
-find_package(GTest)
+
+include(FetchContent)
+FetchContent_Declare(cmake-tools
+    GIT_REPOSITORY https://github.com/rlalik/cmake_tools
+    GIT_TAG        master # from main after sanitizer updates
+)
+FetchContent_MakeAvailable(cmake-tools)
+
+list(APPEND CMAKE_MODULE_PATH
+        ${cmake-tools_SOURCE_DIR}
+)
+
+include(find_or_fetch_package)
+set(INSTALL_GTEST OFF)
+find_or_fetch_package(GTest https://github.com/google/googletest GIT_TAG main)
 
 #configure_file(tests_config.h.in tests_config.h)
 
