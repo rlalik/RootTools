@@ -31,8 +31,8 @@ RT::AxisFormat::AxisFormat()
 {
 }
 
-RT::AxisFormat::AxisFormat(int ndiv, double ls, double lo, double ts, double to, bool center, bool opt,
-                       MODFLAGS flags)
+RT::AxisFormat::AxisFormat(int ndiv, double ls, double lo, double ts, double to, bool center,
+                           bool opt, MODFLAGS flags)
     : Ndiv(ndiv), ls(ls), lo(lo), ts(ts), to(to), center_label(center), optimize(opt), flags(flags)
 {
 }
@@ -206,7 +206,7 @@ Double_t RT::Momentum(Double_t* yP, Double_t* par)
 }
 
 void RT::DrawAngleLine(Double_t angle, Double_t xdraw, Double_t ydraw, Double_t angledraw,
-                              Int_t color, Int_t width, Int_t style)
+                       Int_t color, Int_t width, Int_t style)
 {
     static TF1* ThetaFunc = new TF1("ThetaFunc", &RT::MtY, -4, 4, 2);
     TString anglelabel = TString::Format("#theta=%2.0f#circ", angle);
@@ -230,7 +230,7 @@ void RT::DrawAngleLine(Double_t angle, Double_t xdraw, Double_t ydraw, Double_t 
 }
 
 void RT::DrawMomentumLine(Double_t mom, Double_t xdraw, Double_t ydraw, Double_t angledraw,
-                                 Int_t color, Int_t width, Int_t style)
+                          Int_t color, Int_t width, Int_t style)
 {
     static TF1* PFunc = new TF1("PFunc", &RT::Momentum, -4, 4, 2);
     TString momentumlabel = TString::Format("p=%2.0f MeV/c", mom);
@@ -254,8 +254,8 @@ void RT::DrawMomentumLine(Double_t mom, Double_t xdraw, Double_t ydraw, Double_t
     delete text;
 }
 
-void RT::DrawLine(Double_t x1, Double_t y1, Double_t x2, Double_t y2, Int_t color,
-                         Int_t width, Int_t style)
+void RT::DrawLine(Double_t x1, Double_t y1, Double_t x2, Double_t y2, Int_t color, Int_t width,
+                  Int_t style)
 {
     TLine* line = new TLine;
     line->SetLineColor(color);
@@ -302,13 +302,12 @@ void RT::NicePad(TVirtualPad* pad, Float_t mT, Float_t mR, Float_t mB, Float_t m
 
 void RT::NicePad(TVirtualPad* pad, const PadFormat& format)
 {
-    RT::NicePad(pad, format.marginTop, format.marginRight, format.marginBottom,
-                       format.marginLeft);
+    RT::NicePad(pad, format.marginTop, format.marginRight, format.marginBottom, format.marginLeft);
 }
 
-void RT::NiceHistogram(TH1* h, Int_t ndivx, Int_t ndivy, Float_t xls, Float_t xlo,
-                              Float_t xts, Float_t xto, Float_t yls, Float_t ylo, Float_t yts,
-                              Float_t yto, Bool_t centerX, Bool_t centerY, Bool_t optX, Bool_t optY)
+void RT::NiceHistogram(TH1* h, Int_t ndivx, Int_t ndivy, Float_t xls, Float_t xlo, Float_t xts,
+                       Float_t xto, Float_t yls, Float_t ylo, Float_t yts, Float_t yto,
+                       Bool_t centerX, Bool_t centerY, Bool_t optX, Bool_t optY)
 {
 
     h->GetXaxis()->SetNdivisions(ndivx, optX);
@@ -333,9 +332,9 @@ void RT::NiceHistogram(TH1* h, Int_t ndivx, Int_t ndivy, Float_t xls, Float_t xl
 void RT::NiceHistogram(TH1* h, const GraphFormat& format)
 {
     RT::NiceHistogram(h, format.x.Ndiv, format.y.Ndiv, format.x.ls, format.x.lo, format.x.ts,
-                             format.x.to, format.y.ls, format.y.lo, format.y.ts, format.y.to,
-                             format.x.center_label, format.y.center_label, format.x.optimize,
-                             format.y.optimize);
+                      format.x.to, format.y.ls, format.y.lo, format.y.ts, format.y.to,
+                      format.x.center_label, format.y.center_label, format.x.optimize,
+                      format.y.optimize);
 }
 
 void RT::NiceHistogram(TH2* h, const GraphFormat& format)
@@ -389,9 +388,9 @@ void RT::NiceHistogram(TH1* h, const TString& text)
     }
 }
 
-void RT::NiceGraph(TGraph* gr, Int_t ndivx, Int_t ndivy, Float_t xls, Float_t xlo,
-                          Float_t xts, Float_t xto, Float_t yls, Float_t ylo, Float_t yts,
-                          Float_t yto, Bool_t centerX, Bool_t centerY, Bool_t optX, Bool_t optY)
+void RT::NiceGraph(TGraph* gr, Int_t ndivx, Int_t ndivy, Float_t xls, Float_t xlo, Float_t xts,
+                   Float_t xto, Float_t yls, Float_t ylo, Float_t yts, Float_t yto, Bool_t centerX,
+                   Bool_t centerY, Bool_t optX, Bool_t optY)
 {
     gr->GetXaxis()->SetNdivisions(ndivx, optX);
     gr->GetYaxis()->SetNdivisions(ndivy, optY);
@@ -507,7 +506,7 @@ void RT::AutoScaleF(TH1* hdraw, TH1* href)
 }
 
 std::pair<double, double> RT::calcSubstractionError(TF1* total, TF1* bkg, double l, double u,
-                                                           bool verbose)
+                                                    bool verbose)
 {
     double int_b = bkg->Integral(l, u);
     double int_t = total->Integral(l, u);
@@ -594,7 +593,7 @@ TH1* RT::CloneHistSubrange(TH1* hist, char* name, Int_t bin_min, Int_t bin_max)
 }
 
 Int_t RT::FindEqualIntegralRange(TH1* hist, Float_t integral, Int_t starting_bin, Int_t step,
-                                        Bool_t equal_or_bigger)
+                                 Bool_t equal_or_bigger)
 {
     // 	Float_t eq_int = 0;
 
@@ -743,8 +742,7 @@ void RT::MyMath()
     }
 }
 
-void RT::FetchFitInfo(TF1* fun, double& mean, double& width, double& sig, double& bkg,
-                             TPad* pad)
+void RT::FetchFitInfo(TF1* fun, double& mean, double& width, double& sig, double& bkg, TPad* pad)
 {
     (void)sig;
     (void)bkg;
@@ -1135,7 +1133,7 @@ TString RT::MergeOptions(const TString& prefix, const TString& options, const TS
  * @return void
  */
 void RT::FindBoundaries(TH1* h, Double_t& minimum, Double_t& maximum, Bool_t clean_run,
-                               Bool_t with_error_bars)
+                        Bool_t with_error_bars)
 {
     Int_t binx, biny, binz;
     TAxis* fXaxis = h->GetXaxis();
@@ -1183,7 +1181,7 @@ void RT::FindBoundaries(TH1* h, Double_t& minimum, Double_t& maximum, Bool_t cle
  * @return void
  */
 void RT::FindBoundaries(TGraph* gr, Double_t& minimum, Double_t& maximum, Bool_t clean_run,
-                               Bool_t with_error_bars)
+                        Bool_t with_error_bars)
 {
     Int_t points = gr->GetN();
 
@@ -1281,8 +1279,7 @@ TF1* RT::makeBarOffsetFunction(TF1* fun, double bar_width_scale)
     return f;
 }
 
-double RT::calcFuncErrorBar(TF1* fun, double x1, double x2, double bar_width_scale,
-                                   int /*ccolor*/)
+double RT::calcFuncErrorBar(TF1* fun, double x1, double x2, double bar_width_scale, int /*ccolor*/)
 {
 
     TF1* f_l = makeBarOffsetFunction(fun, -bar_width_scale);
@@ -1490,8 +1487,7 @@ auto RT::errorsStrToArray(const std::string& errors_str) -> std::vector<ErrorsPa
     return errors;
 }
 
-double RT::calcTotalError(const std::vector<ErrorsPair>& errschain, double& err_u,
-                                 double& err_l)
+double RT::calcTotalError(const std::vector<ErrorsPair>& errschain, double& err_u, double& err_l)
 {
     err_u = 0;
     err_l = 0;

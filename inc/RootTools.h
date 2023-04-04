@@ -200,7 +200,7 @@ double calcTotalError(const std::vector<ErrorsPair>& errschain, double& err_u, d
 void calcTotalHistogramValues(TH1* h, double& content, double& error, bool verbose = false);
 
 TH1* makeRelativeErrorHistogram(TH1* h, bool percentage = false);
-}; // namespace RootTools
+}; // namespace RT
 
 Double_t langaufun(Double_t* x, Double_t* par);
 TF1* langaufit(TH1* his, Double_t* fitrange, Double_t* startvalues, Double_t* parlimitslo,
