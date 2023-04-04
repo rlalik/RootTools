@@ -25,21 +25,19 @@
 #define PR(x)                                                                                      \
     std::cout << "++DEBUG: " << #x << " = |" << x << "| (" << __FILE__ << ", " << __LINE__ << ")\n";
 
-using namespace RootTools;
-
-AxisFormat::AxisFormat()
+RT::AxisFormat::AxisFormat()
     : Ndiv(505), ls(0.08), lo(0.005), ts(0.08), to(1.0), center_label(false), optimize(true),
       flags(FALL)
 {
 }
 
-AxisFormat::AxisFormat(int ndiv, double ls, double lo, double ts, double to, bool center, bool opt,
+RT::AxisFormat::AxisFormat(int ndiv, double ls, double lo, double ts, double to, bool center, bool opt,
                        MODFLAGS flags)
     : Ndiv(ndiv), ls(ls), lo(lo), ts(ts), to(to), center_label(center), optimize(opt), flags(flags)
 {
 }
 
-void AxisFormat::format(TAxis* ax) const
+void RT::AxisFormat::format(TAxis* ax) const
 {
     if (flags | NDIV) ax->SetNdivisions(Ndiv, optimize);
     if (flags | LS) ax->SetLabelSize(ls);
@@ -47,10 +45,10 @@ void AxisFormat::format(TAxis* ax) const
     if (flags | TS) ax->SetTitleSize(ts);
     if (flags | TO) ax->SetTitleOffset(to);
 
-    if (flags | CL and center_label) ax->CenterTitle(center_label);
+    if (flags & CL and center_label) ax->CenterTitle(center_label);
 }
 
-void RootTools::def(RootTools::PadFormat& f)
+void RT::def(RT::PadFormat& f)
 {
     f.marginTop = 0.1;
     f.marginRight = 0.1;
@@ -58,7 +56,7 @@ void RootTools::def(RootTools::PadFormat& f)
     f.marginLeft = 0.1;
 }
 
-void RootTools::def(RootTools::GraphFormat& f)
+void RT::def(RT::GraphFormat& f)
 {
     f.x.Ndiv = 505;
     f.x.ls = 0.08;
@@ -79,7 +77,7 @@ void RootTools::def(RootTools::GraphFormat& f)
     f.y.flags = AxisFormat::FALL;
 }
 
-void RootTools::def(RootTools::PaintFormat& f)
+void RT::def(RT::PaintFormat& f)
 {
     PadFormat pf;
     def(pf);
@@ -96,15 +94,12 @@ void RootTools::def(RootTools::PaintFormat& f)
     f.gf.z = gf.z;
 }
 
-Bool_t RootTools::gHasImgExportEnabled = kTRUE;
+Bool_t RT::gHasImgExportEnabled = kTRUE;
+Bool_t RT::gImgExportPNG = kTRUE;
+Bool_t RT::gImgExportEPS = kTRUE;
+Bool_t RT::gImgExportPDF = kFALSE;
 
-// TString RootTools::gImgExportDir = ".";
-
-Bool_t RootTools::gImgExportPNG = kTRUE;
-Bool_t RootTools::gImgExportEPS = kTRUE;
-Bool_t RootTools::gImgExportPDF = kFALSE;
-
-void RootTools::ExportPNG(TCanvas* can, const TString& path)
+void RT::ExportPNG(TCanvas* can, const TString& path)
 {
     TASImage img;
     img.FromPad(can);
@@ -112,7 +107,7 @@ void RootTools::ExportPNG(TCanvas* can, const TString& path)
     img.WriteImage(filename);
 }
 
-void RootTools::ExportEPS(TCanvas* can, const TString& path)
+void RT::ExportEPS(TCanvas* can, const TString& path)
 {
     Int_t oldLevel = gErrorIgnoreLevel;
     gErrorIgnoreLevel = kWarning;
@@ -122,7 +117,7 @@ void RootTools::ExportEPS(TCanvas* can, const TString& path)
     gErrorIgnoreLevel = oldLevel;
 }
 
-void RootTools::ExportPDF(TCanvas* can, const TString& path)
+void RT::ExportPDF(TCanvas* can, const TString& path)
 {
     Int_t oldLevel = gErrorIgnoreLevel;
     gErrorIgnoreLevel = kWarning;
@@ -131,7 +126,7 @@ void RootTools::ExportPDF(TCanvas* can, const TString& path)
     gErrorIgnoreLevel = oldLevel;
 }
 
-void RootTools::ExportMacroC(TCanvas* can, const TString& path)
+void RT::ExportMacroC(TCanvas* can, const TString& path)
 {
     Int_t oldLevel = gErrorIgnoreLevel;
     gErrorIgnoreLevel = kWarning;
@@ -140,7 +135,7 @@ void RootTools::ExportMacroC(TCanvas* can, const TString& path)
     gErrorIgnoreLevel = oldLevel;
 }
 
-void RootTools::ExportImages(TCanvas* can, const TString& path)
+void RT::ExportImages(TCanvas* can, const TString& path)
 {
     if (!gHasImgExportEnabled) return;
 
@@ -149,7 +144,7 @@ void RootTools::ExportImages(TCanvas* can, const TString& path)
     if (gImgExportPDF) ExportPDF(can, path);
 }
 
-void RootTools::SaveAndClose(TCanvas* can, TFile* f, Bool_t export_images, const TString& path)
+void RT::SaveAndClose(TCanvas* can, TFile* f, Bool_t export_images, const TString& path)
 {
     can->Update();
 
@@ -161,7 +156,7 @@ void RootTools::SaveAndClose(TCanvas* can, TFile* f, Bool_t export_images, const
 }
 
 // Theta in ptvsRap, von der Chii
-Double_t RootTools::MtY(Double_t* yP, Double_t* par)
+Double_t RT::MtY(Double_t* yP, Double_t* par)
 {
     // Angle lines
     Double_t M = par[0];
@@ -190,7 +185,7 @@ Double_t RootTools::MtY(Double_t* yP, Double_t* par)
 }
 
 // For lines showing the momentum; done by Malte
-Double_t RootTools::Momentum(Double_t* yP, Double_t* par)
+Double_t RT::Momentum(Double_t* yP, Double_t* par)
 {
     // Momentum lines
     Double_t Mass = par[0];
@@ -210,10 +205,10 @@ Double_t RootTools::Momentum(Double_t* yP, Double_t* par)
     return pt;
 }
 
-void RootTools::DrawAngleLine(Double_t angle, Double_t xdraw, Double_t ydraw, Double_t angledraw,
+void RT::DrawAngleLine(Double_t angle, Double_t xdraw, Double_t ydraw, Double_t angledraw,
                               Int_t color, Int_t width, Int_t style)
 {
-    static TF1* ThetaFunc = new TF1("ThetaFunc", &RootTools::MtY, -4, 4, 2);
+    static TF1* ThetaFunc = new TF1("ThetaFunc", &RT::MtY, -4, 4, 2);
     TString anglelabel = TString::Format("#theta=%2.0f#circ", angle);
 
     ThetaFunc->SetLineColor(color);
@@ -234,10 +229,10 @@ void RootTools::DrawAngleLine(Double_t angle, Double_t xdraw, Double_t ydraw, Do
     delete text;
 }
 
-void RootTools::DrawMomentumLine(Double_t mom, Double_t xdraw, Double_t ydraw, Double_t angledraw,
+void RT::DrawMomentumLine(Double_t mom, Double_t xdraw, Double_t ydraw, Double_t angledraw,
                                  Int_t color, Int_t width, Int_t style)
 {
-    static TF1* PFunc = new TF1("PFunc", &RootTools::Momentum, -4, 4, 2);
+    static TF1* PFunc = new TF1("PFunc", &RT::Momentum, -4, 4, 2);
     TString momentumlabel = TString::Format("p=%2.0f MeV/c", mom);
 
     PFunc->SetLineColor(color);
@@ -259,7 +254,7 @@ void RootTools::DrawMomentumLine(Double_t mom, Double_t xdraw, Double_t ydraw, D
     delete text;
 }
 
-void RootTools::DrawLine(Double_t x1, Double_t y1, Double_t x2, Double_t y2, Int_t color,
+void RT::DrawLine(Double_t x1, Double_t y1, Double_t x2, Double_t y2, Int_t color,
                          Int_t width, Int_t style)
 {
     TLine* line = new TLine;
@@ -270,7 +265,7 @@ void RootTools::DrawLine(Double_t x1, Double_t y1, Double_t x2, Double_t y2, Int
     line->DrawLine(x1, y1, x2, y2);
 }
 
-TPaletteAxis* RootTools::NicePalette(TH2* h, Float_t ls, Float_t ts, Float_t to)
+TPaletteAxis* RT::NicePalette(TH2* h, Float_t ls, Float_t ts, Float_t to)
 {
     (void)ls;
     (void)ts;
@@ -284,7 +279,7 @@ TPaletteAxis* RootTools::NicePalette(TH2* h, Float_t ls, Float_t ts, Float_t to)
     return axis;
 }
 
-TPaletteAxis* RootTools::NoPalette(TH2* h)
+TPaletteAxis* RT::NoPalette(TH2* h)
 {
     gPad->Update();
 
@@ -297,7 +292,7 @@ TPaletteAxis* RootTools::NoPalette(TH2* h)
     return 0;
 }
 
-void RootTools::NicePad(TVirtualPad* pad, Float_t mT, Float_t mR, Float_t mB, Float_t mL)
+void RT::NicePad(TVirtualPad* pad, Float_t mT, Float_t mR, Float_t mB, Float_t mL)
 {
     pad->SetTopMargin(mT);
     pad->SetBottomMargin(mB);
@@ -305,13 +300,13 @@ void RootTools::NicePad(TVirtualPad* pad, Float_t mT, Float_t mR, Float_t mB, Fl
     pad->SetRightMargin(mR);
 }
 
-void RootTools::NicePad(TVirtualPad* pad, const PadFormat& format)
+void RT::NicePad(TVirtualPad* pad, const PadFormat& format)
 {
-    RootTools::NicePad(pad, format.marginTop, format.marginRight, format.marginBottom,
+    RT::NicePad(pad, format.marginTop, format.marginRight, format.marginBottom,
                        format.marginLeft);
 }
 
-void RootTools::NiceHistogram(TH1* h, Int_t ndivx, Int_t ndivy, Float_t xls, Float_t xlo,
+void RT::NiceHistogram(TH1* h, Int_t ndivx, Int_t ndivy, Float_t xls, Float_t xlo,
                               Float_t xts, Float_t xto, Float_t yls, Float_t ylo, Float_t yts,
                               Float_t yto, Bool_t centerX, Bool_t centerY, Bool_t optX, Bool_t optY)
 {
@@ -335,22 +330,22 @@ void RootTools::NiceHistogram(TH1* h, Int_t ndivx, Int_t ndivy, Float_t xls, Flo
     if (centerY) h->GetYaxis()->CenterTitle(centerY);
 }
 
-void RootTools::NiceHistogram(TH1* h, const GraphFormat& format)
+void RT::NiceHistogram(TH1* h, const GraphFormat& format)
 {
-    RootTools::NiceHistogram(h, format.x.Ndiv, format.y.Ndiv, format.x.ls, format.x.lo, format.x.ts,
+    RT::NiceHistogram(h, format.x.Ndiv, format.y.Ndiv, format.x.ls, format.x.lo, format.x.ts,
                              format.x.to, format.y.ls, format.y.lo, format.y.ts, format.y.to,
                              format.x.center_label, format.y.center_label, format.x.optimize,
                              format.y.optimize);
 }
 
-void RootTools::NiceHistogram(TH2* h, const GraphFormat& format)
+void RT::NiceHistogram(TH2* h, const GraphFormat& format)
 {
     format.x.format(h->GetXaxis());
     format.y.format(h->GetYaxis());
     format.z.format(h->GetZaxis());
 }
 
-void RootTools::NiceHistogram(TH1* h, const TString& text)
+void RT::NiceHistogram(TH1* h, const TString& text)
 {
     TObjArray* arr = text.Tokenize(";");
 
@@ -394,7 +389,7 @@ void RootTools::NiceHistogram(TH1* h, const TString& text)
     }
 }
 
-void RootTools::NiceGraph(TGraph* gr, Int_t ndivx, Int_t ndivy, Float_t xls, Float_t xlo,
+void RT::NiceGraph(TGraph* gr, Int_t ndivx, Int_t ndivy, Float_t xls, Float_t xlo,
                           Float_t xts, Float_t xto, Float_t yls, Float_t ylo, Float_t yts,
                           Float_t yto, Bool_t centerX, Bool_t centerY, Bool_t optX, Bool_t optY)
 {
@@ -415,13 +410,13 @@ void RootTools::NiceGraph(TGraph* gr, Int_t ndivx, Int_t ndivy, Float_t xls, Flo
     if (centerY) gr->GetYaxis()->CenterTitle(centerY);
 }
 
-void RootTools::NiceGraph(TGraph* gr, const GraphFormat& format)
+void RT::NiceGraph(TGraph* gr, const GraphFormat& format)
 {
     format.x.format(gr->GetXaxis());
     format.y.format(gr->GetYaxis());
 }
 
-void RootTools::AutoScale(TH1* hdraw, TH1* href, Bool_t MinOnZero)
+void RT::AutoScale(TH1* hdraw, TH1* href, Bool_t MinOnZero)
 {
     Float_t idrawmax = hdraw->GetBinContent(hdraw->GetMaximumBin());
     Float_t irefmax = href->GetBinContent(href->GetMaximumBin());
@@ -443,19 +438,19 @@ void RootTools::AutoScale(TH1* hdraw, TH1* href, Bool_t MinOnZero)
     hdraw->GetYaxis()->SetRangeUser(scalemin, scalemax);
 }
 
-void RootTools::AutoScale(TH1* hdraw, TH1* href1, TH1* href2)
+void RT::AutoScale(TH1* hdraw, TH1* href1, TH1* href2)
 {
     if (!href1 and !href2) { return; }
 
     if (!href1 and href2)
     {
-        RootTools::AutoScale(hdraw, href2);
+        RT::AutoScale(hdraw, href2);
         return;
     }
 
     if (href1 and !href2)
     {
-        RootTools::AutoScale(hdraw, href1);
+        RT::AutoScale(hdraw, href1);
         return;
     }
 
@@ -481,7 +476,7 @@ void RootTools::AutoScale(TH1* hdraw, TH1* href1, TH1* href2)
     hdraw->GetYaxis()->SetRangeUser(scalemin, scalemax);
 }
 
-void RootTools::AutoScaleF(TH1* hdraw, TH1* href)
+void RT::AutoScaleF(TH1* hdraw, TH1* href)
 {
     TF1* fdraw = (TF1*)hdraw->GetListOfFunctions()->At(0);
     TF1* fref = (TF1*)href->GetListOfFunctions()->At(0);
@@ -511,7 +506,7 @@ void RootTools::AutoScaleF(TH1* hdraw, TH1* href)
     hdraw->GetYaxis()->SetRangeUser(scalemin, scalemax);
 }
 
-std::pair<double, double> RootTools::calcSubstractionError(TF1* total, TF1* bkg, double l, double u,
+std::pair<double, double> RT::calcSubstractionError(TF1* total, TF1* bkg, double l, double u,
                                                            bool verbose)
 {
     double int_b = bkg->Integral(l, u);
@@ -526,7 +521,7 @@ std::pair<double, double> RootTools::calcSubstractionError(TF1* total, TF1* bkg,
     return std::pair<double, double>(s_delta, s_error);
 }
 
-double RootTools::calcTotalError(TH1* h, Int_t bin_l, Int_t bin_u)
+double RT::calcTotalError(TH1* h, Int_t bin_l, Int_t bin_u)
 {
     double val = 0.0;
     double val_;
@@ -539,7 +534,7 @@ double RootTools::calcTotalError(TH1* h, Int_t bin_l, Int_t bin_u)
     return TMath::Sqrt(val);
 }
 
-double RootTools::calcTotalError2(TH1* h, Int_t bin_l, Int_t bin_u)
+double RT::calcTotalError2(TH1* h, Int_t bin_l, Int_t bin_u)
 {
     double val = 0.0;
     double val_;
@@ -552,7 +547,7 @@ double RootTools::calcTotalError2(TH1* h, Int_t bin_l, Int_t bin_u)
     return TMath::Sqrt(val);
 }
 
-TNamed* RootTools::GetObjectFromFile(TFile* f, const TString& name, const TString& suffix)
+TNamed* RT::GetObjectFromFile(TFile* f, const TString& name, const TString& suffix)
 {
     TNamed* dest = nullptr;
 
@@ -569,7 +564,7 @@ TNamed* RootTools::GetObjectFromFile(TFile* f, const TString& name, const TStrin
     return dest;
 }
 
-void RootTools::NicePalette()
+void RT::NicePalette()
 {
     const Int_t NRGBs = 5;
     const Int_t NCont = 255;
@@ -584,7 +579,7 @@ void RootTools::NicePalette()
     gStyle->SetOptStat(0);
 }
 
-TH1* RootTools::CloneHistSubrange(TH1* hist, char* name, Int_t bin_min, Int_t bin_max)
+TH1* RT::CloneHistSubrange(TH1* hist, char* name, Int_t bin_min, Int_t bin_max)
 {
     TH1* h = (TH1*)hist->Clone(name);
     h->SetBins(bin_max - bin_min, hist->GetBinLowEdge(bin_min), hist->GetBinLowEdge(bin_max));
@@ -598,7 +593,7 @@ TH1* RootTools::CloneHistSubrange(TH1* hist, char* name, Int_t bin_min, Int_t bi
     return h;
 }
 
-Int_t RootTools::FindEqualIntegralRange(TH1* hist, Float_t integral, Int_t starting_bin, Int_t step,
+Int_t RT::FindEqualIntegralRange(TH1* hist, Float_t integral, Int_t starting_bin, Int_t step,
                                         Bool_t equal_or_bigger)
 {
     // 	Float_t eq_int = 0;
@@ -624,7 +619,7 @@ Int_t RootTools::FindEqualIntegralRange(TH1* hist, Float_t integral, Int_t start
     return starting_bin;
 }
 
-void RootTools::QuickDraw(TVirtualPad* p, TH1* h, const char* opts, UChar_t logbits)
+void RT::QuickDraw(TVirtualPad* p, TH1* h, const char* opts, UChar_t logbits)
 {
     p->cd();
     h->Draw(opts);
@@ -634,7 +629,7 @@ void RootTools::QuickDraw(TVirtualPad* p, TH1* h, const char* opts, UChar_t logb
     if (logbits & 0x04) p->SetLogy();
 }
 
-void RootTools::DrawStats(TVirtualPad* p, TH1* h, UInt_t flags, Float_t x, Float_t y, Float_t dy)
+void RT::DrawStats(TVirtualPad* p, TH1* h, UInt_t flags, Float_t x, Float_t y, Float_t dy)
 {
     p->cd();
 
@@ -654,7 +649,7 @@ void RootTools::DrawStats(TVirtualPad* p, TH1* h, UInt_t flags, Float_t x, Float
     }
 }
 
-bool RootTools::FindMaxRange(float& range, const TH1* hist)
+bool RT::FindMaxRange(float& range, const TH1* hist)
 {
     int max_rb = hist->GetMaximumBin();
     float max_r = hist->GetBinContent(max_rb);
@@ -667,7 +662,7 @@ bool RootTools::FindMaxRange(float& range, const TH1* hist)
     return false;
 }
 
-bool RootTools::FindMaxRange(float& range, float& cand)
+bool RT::FindMaxRange(float& range, float& cand)
 {
     if (cand > range)
     {
@@ -678,7 +673,7 @@ bool RootTools::FindMaxRange(float& range, float& cand)
     return false;
 }
 
-void RootTools::MyMath()
+void RT::MyMath()
 {
     gSystem->Load("libMathMore");
 
@@ -748,7 +743,7 @@ void RootTools::MyMath()
     }
 }
 
-void RootTools::FetchFitInfo(TF1* fun, double& mean, double& width, double& sig, double& bkg,
+void RT::FetchFitInfo(TF1* fun, double& mean, double& width, double& sig, double& bkg,
                              TPad* pad)
 {
     (void)sig;
@@ -869,7 +864,7 @@ void RootTools::FetchFitInfo(TF1* fun, double& mean, double& width, double& sig,
     }
 }
 
-// bool RootTools::Smooth(TH1 * h, int par)
+// bool RT::Smooth(TH1 * h, int par)
 // {
 // // 	TH1 * htmp = h->Clone("_XXYYZZ_temporary");
 // // 	h->Delete();
@@ -954,7 +949,7 @@ void RootTools::FetchFitInfo(TF1* fun, double& mean, double& width, double& sig,
 // 	return true;
 // }
 
-bool RootTools::Smooth(TH1* h)
+bool RT::Smooth(TH1* h)
 {
     // 	TH1 * htmp = h->Clone("_XXYYZZ_temporary");
     // 	h->Delete();
@@ -1044,7 +1039,7 @@ bool RootTools::Smooth(TH1* h)
     return true;
 }
 
-bool RootTools::Smooth(TH1* h, int loops)
+bool RT::Smooth(TH1* h, int loops)
 {
     for (int i = 0; i < loops; ++i)
         if (!Smooth(h)) return false;
@@ -1052,7 +1047,7 @@ bool RootTools::Smooth(TH1* h, int loops)
     return true;
 }
 
-float RootTools::Normalize(TH1* h, TH1* href, bool extended)
+float RT::Normalize(TH1* h, TH1* href, bool extended)
 {
     if (!extended)
     {
@@ -1117,7 +1112,7 @@ std::ostream& set_color(std::ostream& s, TermColors c)
     return s;
 }
 
-TString RootTools::MergeOptions(const TString& prefix, const TString& options, const TString& alt)
+TString RT::MergeOptions(const TString& prefix, const TString& options, const TString& alt)
 {
     TString res;
     if (options.Length()) { res = (prefix + "," + options); }
@@ -1139,7 +1134,7 @@ TString RootTools::MergeOptions(const TString& prefix, const TString& options, c
  * @param with_error_bars consider error bars for boundaries
  * @return void
  */
-void RootTools::FindBoundaries(TH1* h, Double_t& minimum, Double_t& maximum, Bool_t clean_run,
+void RT::FindBoundaries(TH1* h, Double_t& minimum, Double_t& maximum, Bool_t clean_run,
                                Bool_t with_error_bars)
 {
     Int_t binx, biny, binz;
@@ -1187,7 +1182,7 @@ void RootTools::FindBoundaries(TH1* h, Double_t& minimum, Double_t& maximum, Boo
  * @param with_error_bars consider error bars for boundaries
  * @return void
  */
-void RootTools::FindBoundaries(TGraph* gr, Double_t& minimum, Double_t& maximum, Bool_t clean_run,
+void RT::FindBoundaries(TGraph* gr, Double_t& minimum, Double_t& maximum, Bool_t clean_run,
                                Bool_t with_error_bars)
 {
     Int_t points = gr->GetN();
@@ -1216,7 +1211,7 @@ void RootTools::FindBoundaries(TGraph* gr, Double_t& minimum, Double_t& maximum,
     }
 }
 
-bool RootTools::FileIsNewer(const char* file, const char* reference)
+bool RT::FileIsNewer(const char* file, const char* reference)
 {
     struct stat st_ref;
     struct stat st_aux;
@@ -1241,7 +1236,7 @@ bool RootTools::FileIsNewer(const char* file, const char* reference)
     return mod_aux > mod_ref;
 }
 
-auto RootTools::split(const std::string& s, char delim, std::vector<std::string>& elems)
+auto RT::split(const std::string& s, char delim, std::vector<std::string>& elems)
     -> std::vector<std::string>&
 {
     std::stringstream ss(s);
@@ -1253,14 +1248,14 @@ auto RootTools::split(const std::string& s, char delim, std::vector<std::string>
     return elems;
 }
 
-auto RootTools::split(const std::string& s, char delim) -> std::vector<std::string>
+auto RT::split(const std::string& s, char delim) -> std::vector<std::string>
 {
     std::vector<std::string> elems;
     split(s, delim, elems);
     return elems;
 }
 
-TF1* RootTools::makeBarOffsetFunction(TF1* fun, double bar_width_scale)
+TF1* RT::makeBarOffsetFunction(TF1* fun, double bar_width_scale)
 {
     TF1* f = new TF1();
     fun->Copy(*f);
@@ -1286,7 +1281,7 @@ TF1* RootTools::makeBarOffsetFunction(TF1* fun, double bar_width_scale)
     return f;
 }
 
-double RootTools::calcFuncErrorBar(TF1* fun, double x1, double x2, double bar_width_scale,
+double RT::calcFuncErrorBar(TF1* fun, double x1, double x2, double bar_width_scale,
                                    int /*ccolor*/)
 {
 
@@ -1306,7 +1301,7 @@ double RootTools::calcFuncErrorBar(TF1* fun, double x1, double x2, double bar_wi
     return delta;
 }
 
-void RootTools::copyRelativeErrors(TH1* destination, TH1* source)
+void RT::copyRelativeErrors(TH1* destination, TH1* source)
 {
     Int_t binx, biny, binz;
     TAxis* fXaxis = destination->GetXaxis();
@@ -1344,7 +1339,7 @@ void RootTools::copyRelativeErrors(TH1* destination, TH1* source)
             }
 }
 
-void RootTools::calcBinomialErrors(TH1* p, TH1* N)
+void RT::calcBinomialErrors(TH1* p, TH1* N)
 {
     size_t bins_x = p->GetXaxis()->GetNbins();
     size_t bins_y = p->GetYaxis()->GetNbins();
@@ -1362,7 +1357,7 @@ void RootTools::calcBinomialErrors(TH1* p, TH1* N)
     }
 }
 
-void RootTools::calcBinomialErrors(TH1* p, TH1* q, TH1* N)
+void RT::calcBinomialErrors(TH1* p, TH1* q, TH1* N)
 {
     size_t bins_x = p->GetXaxis()->GetNbins();
     size_t bins_y = p->GetYaxis()->GetNbins();
@@ -1381,7 +1376,7 @@ void RootTools::calcBinomialErrors(TH1* p, TH1* q, TH1* N)
     }
 }
 
-void RootTools::calcErrorPropagationMult(TH1* h, double val, double err)
+void RT::calcErrorPropagationMult(TH1* h, double val, double err)
 {
     size_t bins_x = h->GetXaxis()->GetNbins();
     size_t bins_y = h->GetYaxis()->GetNbins();
@@ -1399,7 +1394,7 @@ void RootTools::calcErrorPropagationMult(TH1* h, double val, double err)
     }
 }
 
-void RootTools::calcErrorPropagationDiv(TH1* h, double val, double err)
+void RT::calcErrorPropagationDiv(TH1* h, double val, double err)
 {
     size_t bins_x = h->GetXaxis()->GetNbins();
     size_t bins_y = h->GetYaxis()->GetNbins();
@@ -1417,7 +1412,7 @@ void RootTools::calcErrorPropagationDiv(TH1* h, double val, double err)
     }
 }
 
-auto RootTools::errorsStrToArray(const std::string& errors_str) -> std::vector<ErrorsPair>
+auto RT::errorsStrToArray(const std::string& errors_str) -> std::vector<ErrorsPair>
 {
     std::vector<ErrorsPair> errors;
     size_t global_pos = 0;
@@ -1495,7 +1490,7 @@ auto RootTools::errorsStrToArray(const std::string& errors_str) -> std::vector<E
     return errors;
 }
 
-double RootTools::calcTotalError(const std::vector<ErrorsPair>& errschain, double& err_u,
+double RT::calcTotalError(const std::vector<ErrorsPair>& errschain, double& err_u,
                                  double& err_l)
 {
     err_u = 0;
@@ -1514,7 +1509,7 @@ double RootTools::calcTotalError(const std::vector<ErrorsPair>& errschain, doubl
     return err;
 }
 
-double RootTools::calcTotalError(TH1* h, bool verbose)
+double RT::calcTotalError(TH1* h, bool verbose)
 {
     size_t bins_x = h->GetXaxis()->GetNbins();
     size_t bins_y = h->GetYaxis()->GetNbins();
@@ -1539,7 +1534,7 @@ double RootTools::calcTotalError(TH1* h, bool verbose)
     return sqrt(total_err);
 }
 
-double RootTools::calcTotalContent(TH1* h, bool verbose)
+double RT::calcTotalContent(TH1* h, bool verbose)
 {
     size_t bins_x = h->GetXaxis()->GetNbins();
     size_t bins_y = h->GetYaxis()->GetNbins();
@@ -1562,7 +1557,7 @@ double RootTools::calcTotalContent(TH1* h, bool verbose)
     return total_content;
 }
 
-void RootTools::calcTotalHistogramValues(TH1* h, double& content, double& error, bool verbose)
+void RT::calcTotalHistogramValues(TH1* h, double& content, double& error, bool verbose)
 {
     size_t bins_x = h->GetXaxis()->GetNbins();
     size_t bins_y = h->GetYaxis()->GetNbins();
@@ -1592,7 +1587,7 @@ void RootTools::calcTotalHistogramValues(TH1* h, double& content, double& error,
     printf("  content = %g  sqrt(%g) = %g\n", content, total_err, error);
 }
 
-TH1* RootTools::makeRelativeErrorHistogram(TH1* h, bool percentage)
+TH1* RT::makeRelativeErrorHistogram(TH1* h, bool percentage)
 {
     TH1* re = (TH1*)h->Clone();
     re->Reset();

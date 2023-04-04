@@ -20,7 +20,7 @@ struct ErrorsPair
     double low;
 };
 
-namespace RootTools
+namespace RT
 {
 
 enum StatFlags
@@ -245,7 +245,7 @@ std::ostream& operator<<(std::ostream& os, const smanip& m);
 std::ostream& set_color(std::ostream& s, TermColors c);
 inline smanip color(TermColors n) { return smanip(set_color, n); }
 
-template <class T> void RootTools::FindRangeExtremum(T& min, T& max, const TH1* hist)
+template <class T> void RT::FindRangeExtremum(T& min, T& max, const TH1* hist)
 {
     int max_rb = hist->GetMaximumBin();
     T max_r = hist->GetBinContent(max_rb);
@@ -256,14 +256,14 @@ template <class T> void RootTools::FindRangeExtremum(T& min, T& max, const TH1* 
     if (min_r < min) { min = min_r; }
 }
 
-template <class T> void RootTools::FindRangeExtremum(T& min, T& max, T& cand)
+template <class T> void RT::FindRangeExtremum(T& min, T& max, T& cand)
 {
     if (cand > max) { max = cand; }
 
     if (cand < min) { min = cand; }
 }
 
-template <class T> void RootTools::FindRangeExtremum(T& min, T& max, const TH2* hist)
+template <class T> void RT::FindRangeExtremum(T& min, T& max, const TH2* hist)
 {
     int max_rb_x, max_rb_y, max_rb_z;
     hist->GetMaximumBin(max_rb_x, max_rb_y, max_rb_z);
