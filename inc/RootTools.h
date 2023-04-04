@@ -41,14 +41,14 @@ struct AxisFormat
     enum MODFLAGS
     {
         FNONE = 0,
-        NDIV = 1,
-        LS = 2,
-        LO = 4,
-        TS = 8,
-        TO = 16,
-        CL = 32,
-        OPT = 64,
-        FALL = 127
+        NDIV = 1 << 0,
+        LS = 1 << 1,
+        LO = 1 << 2,
+        TS = 1 << 3,
+        TO = 1 << 4,
+        CL = 1 << 5,
+        OPT = 1 << 6,
+        FALL = 1 << 7
     };
 
     AxisFormat();

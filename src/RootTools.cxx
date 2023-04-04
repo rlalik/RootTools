@@ -39,11 +39,11 @@ RT::AxisFormat::AxisFormat(int ndiv, double ls, double lo, double ts, double to,
 
 void RT::AxisFormat::format(TAxis* ax) const
 {
-    if (flags | NDIV) ax->SetNdivisions(Ndiv, optimize);
-    if (flags | LS) ax->SetLabelSize(ls);
-    if (flags | LO) ax->SetLabelOffset(lo);
-    if (flags | TS) ax->SetTitleSize(ts);
-    if (flags | TO) ax->SetTitleOffset(to);
+    if (flags & NDIV) ax->SetNdivisions(Ndiv, optimize);
+    if (flags & LS) ax->SetLabelSize(ls);
+    if (flags & LO) ax->SetLabelOffset(lo);
+    if (flags & TS) ax->SetTitleSize(ts);
+    if (flags & TO) ax->SetTitleOffset(to);
 
     if (flags & CL and center_label) ax->CenterTitle(center_label);
 }
