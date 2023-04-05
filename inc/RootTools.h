@@ -14,19 +14,22 @@ class TVirtualPad;
 #include <string>
 #include <vector>
 
+namespace RT
+{
+
 struct ErrorsPair
 {
     double high;
     double low;
 };
 
-namespace RT
-{
-
 enum StatFlags
 {
     SF_COUNTS = 0x01,
 };
+
+namespace Hist
+{
 
 struct PadFormat
 {
@@ -82,33 +85,6 @@ void def(PadFormat& f);
 void def(GraphFormat& f);
 void def(PaintFormat& f);
 
-// Export Images
-extern Bool_t gHasImgExportEnabled;
-
-extern Bool_t gImgExportPNG;
-extern Bool_t gImgExportEPS;
-extern Bool_t gImgExportPDF;
-
-void ExportPNG(TCanvas* can, const TString& path = "./");
-void ExportEPS(TCanvas* can, const TString& path = "./");
-void ExportPDF(TCanvas* can, const TString& path = "./");
-void ExportMacroC(TCanvas* can, const TString& path = "./");
-void ExportImages(TCanvas* can, const TString& path = "./");
-
-void SaveAndClose(TCanvas* can, TFile* f, Bool_t export_images = kTRUE, const TString& path = "./");
-
-// Pt and Momentum functions
-Double_t MtY(Double_t* yP, Double_t* par);
-Double_t Momentum(Double_t* yP, Double_t* par);
-
-void DrawAngleLine(Double_t angle, Double_t xdraw = -10, Double_t ydraw = -10,
-                   Double_t angledraw = 02, Int_t color = kBlack, Int_t width = 2, Int_t style = 2);
-void DrawMomentumLine(Double_t mom, Double_t xdraw = -10, Double_t ydraw = -10,
-                      Double_t angledraw = 02, Int_t color = kBlack, Int_t width = 2,
-                      Int_t style = 2);
-void DrawLine(Double_t x1, Double_t y1, Double_t x2, Double_t y2, Int_t color = kBlack,
-              Int_t width = 1, Int_t style = 1);
-
 void NicePad(TVirtualPad* pad, Float_t mT, Float_t mR, Float_t mB, Float_t mL);
 void NicePad(TVirtualPad* pad, const PadFormat& format);
 
@@ -126,6 +102,44 @@ void NiceGraph(TGraph* gr, Int_t ndivx, Int_t ndivy, Float_t xls, Float_t xlo, F
                Bool_t centerX = kFALSE, Bool_t centerY = kFALSE, Bool_t optX = kTRUE,
                Bool_t optY = kTRUE);
 void NiceGraph(TGraph* gr, const GraphFormat& format);
+
+}; // namespace Hist
+
+namespace Drawing
+{
+
+void DrawAngleLine(Double_t angle, Double_t xdraw = -10, Double_t ydraw = -10,
+                   Double_t angledraw = 02, Int_t color = kBlack, Int_t width = 2, Int_t style = 2);
+void DrawMomentumLine(Double_t mom, Double_t xdraw = -10, Double_t ydraw = -10,
+                      Double_t angledraw = 02, Int_t color = kBlack, Int_t width = 2,
+                      Int_t style = 2);
+void DrawLine(Double_t x1, Double_t y1, Double_t x2, Double_t y2, Int_t color = kBlack,
+              Int_t width = 1, Int_t style = 1);
+
+}; // namespace Drawing
+
+namespace Exports
+{
+// Export Images
+extern Bool_t gHasImgExportEnabled;
+
+extern Bool_t gImgExportPNG;
+extern Bool_t gImgExportEPS;
+extern Bool_t gImgExportPDF;
+
+void ExportPNG(TCanvas* can, const TString& path = "./");
+void ExportEPS(TCanvas* can, const TString& path = "./");
+void ExportPDF(TCanvas* can, const TString& path = "./");
+void ExportMacroC(TCanvas* can, const TString& path = "./");
+void ExportImages(TCanvas* can, const TString& path = "./");
+
+void SaveAndClose(TCanvas* can, TFile* f, Bool_t export_images = kTRUE, const TString& path = "./");
+
+} // namespace Exports
+
+// Pt and Momentum functions
+Double_t MtY(Double_t* yP, Double_t* par);
+Double_t Momentum(Double_t* yP, Double_t* par);
 
 TPaletteAxis* NicePalette(TH2* h, Float_t ls, Float_t ts = 0, Float_t to = 0);
 TPaletteAxis* NoPalette(TH2* h);

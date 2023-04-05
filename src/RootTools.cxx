@@ -25,19 +25,22 @@
 #define PR(x)                                                                                      \
     std::cout << "++DEBUG: " << #x << " = |" << x << "| (" << __FILE__ << ", " << __LINE__ << ")\n";
 
-RT::AxisFormat::AxisFormat()
+namespace RT::Hist
+{
+
+AxisFormat::AxisFormat()
     : Ndiv(505), ls(0.08), lo(0.005), ts(0.08), to(1.0), center_label(false), optimize(true),
       flags(FALL)
 {
 }
 
-RT::AxisFormat::AxisFormat(int ndiv, double ls, double lo, double ts, double to, bool center,
-                           bool opt, MODFLAGS flags)
+AxisFormat::AxisFormat(int ndiv, double ls, double lo, double ts, double to, bool center, bool opt,
+                       MODFLAGS flags)
     : Ndiv(ndiv), ls(ls), lo(lo), ts(ts), to(to), center_label(center), optimize(opt), flags(flags)
 {
 }
 
-void RT::AxisFormat::format(TAxis* ax) const
+void AxisFormat::format(TAxis* ax) const
 {
     if (flags & NDIV) ax->SetNdivisions(Ndiv, optimize);
     if (flags & LS) ax->SetLabelSize(ls);
@@ -48,7 +51,7 @@ void RT::AxisFormat::format(TAxis* ax) const
     if (flags & CL and center_label) ax->CenterTitle(center_label);
 }
 
-void RT::def(RT::PadFormat& f)
+void def(PadFormat& f)
 {
     f.marginTop = 0.1;
     f.marginRight = 0.1;
@@ -56,7 +59,7 @@ void RT::def(RT::PadFormat& f)
     f.marginLeft = 0.1;
 }
 
-void RT::def(RT::GraphFormat& f)
+void def(GraphFormat& f)
 {
     f.x.Ndiv = 505;
     f.x.ls = 0.08;
@@ -77,7 +80,7 @@ void RT::def(RT::GraphFormat& f)
     f.y.flags = AxisFormat::FALL;
 }
 
-void RT::def(RT::PaintFormat& f)
+void def(PaintFormat& f)
 {
     PadFormat pf;
     def(pf);
@@ -94,12 +97,140 @@ void RT::def(RT::PaintFormat& f)
     f.gf.z = gf.z;
 }
 
-Bool_t RT::gHasImgExportEnabled = kTRUE;
-Bool_t RT::gImgExportPNG = kTRUE;
-Bool_t RT::gImgExportEPS = kTRUE;
-Bool_t RT::gImgExportPDF = kFALSE;
+void NicePad(TVirtualPad* pad, Float_t mT, Float_t mR, Float_t mB, Float_t mL)
+{
+    pad->SetTopMargin(mT);
+    pad->SetBottomMargin(mB);
+    pad->SetLeftMargin(mL);
+    pad->SetRightMargin(mR);
+}
 
-void RT::ExportPNG(TCanvas* can, const TString& path)
+void NicePad(TVirtualPad* pad, const PadFormat& format)
+{
+    NicePad(pad, format.marginTop, format.marginRight, format.marginBottom, format.marginLeft);
+}
+
+void NiceHistogram(TH1* h, Int_t ndivx, Int_t ndivy, Float_t xls, Float_t xlo, Float_t xts,
+                       Float_t xto, Float_t yls, Float_t ylo, Float_t yts, Float_t yto,
+                       Bool_t centerX, Bool_t centerY, Bool_t optX, Bool_t optY)
+{
+
+    h->GetXaxis()->SetNdivisions(ndivx, optX);
+    h->GetYaxis()->SetNdivisions(ndivy, optY);
+
+    h->SetStats(0);
+
+    h->SetLabelSize(xls, "X");
+    h->SetLabelSize(yls, "Y");
+    h->SetLabelOffset(xlo, "X");
+    h->SetLabelOffset(ylo, "Y");
+
+    h->SetTitleSize(xts, "X");
+    h->SetTitleSize(yts, "Y");
+    h->SetTitleOffset(xto, "X");
+    h->SetTitleOffset(yto, "Y");
+
+    if (centerX) h->GetXaxis()->CenterTitle(centerX);
+    if (centerY) h->GetYaxis()->CenterTitle(centerY);
+}
+
+void NiceHistogram(TH1* h, const GraphFormat& format)
+{
+    NiceHistogram(h, format.x.Ndiv, format.y.Ndiv, format.x.ls, format.x.lo, format.x.ts,
+                      format.x.to, format.y.ls, format.y.lo, format.y.ts, format.y.to,
+                      format.x.center_label, format.y.center_label, format.x.optimize,
+                      format.y.optimize);
+}
+
+void NiceHistogram(TH2* h, const GraphFormat& format)
+{
+    format.x.format(h->GetXaxis());
+    format.y.format(h->GetYaxis());
+    format.z.format(h->GetZaxis());
+}
+
+void NiceHistogram(TH1* h, const TString& text)
+{
+    TObjArray* arr = text.Tokenize(";");
+
+    size_t arr_len = arr->GetEntries();
+
+    for (uint i = 0; i < arr_len; ++i)
+    {
+        // 		PR(i);
+        TObjArray* entry = ((TObjString*)arr->At(i))->GetString().Tokenize(":=");
+        if (entry->GetEntries() != 2) continue;
+
+        TString key = ((TObjString*)entry->At(0))->GetString();
+        TString val = ((TObjString*)entry->At(1))->GetString();
+        // 		PR(key.Data());
+        // 		PR(val.Data());
+
+        if (key == "lc")
+            h->SetLineColor(val.Atoi());
+        else if (key == "lw")
+            h->SetLineWidth(val.Atoi());
+        else if (key == "lt")
+            h->SetLineStyle(val.Atoi());
+
+        else if (key == "mc")
+            h->SetMarkerColor(val.Atoi());
+        else if (key == "ms")
+            h->SetMarkerSize(val.Atof());
+        else if (key == "mt")
+            h->SetMarkerStyle(val.Atoi());
+
+        else if (key == "fc")
+            h->SetFillColor(val.Atoi());
+        else if (key == "ft")
+            h->SetFillStyle(val.Atoi());
+
+        else if (key == "ho")
+            h->SetOption(val);
+
+        else
+            printf(" - Unknow arguments %s = %s, skipping them...\n", key.Data(), val.Data());
+    }
+}
+
+void NiceGraph(TGraph* gr, Int_t ndivx, Int_t ndivy, Float_t xls, Float_t xlo, Float_t xts,
+                   Float_t xto, Float_t yls, Float_t ylo, Float_t yts, Float_t yto, Bool_t centerX,
+                   Bool_t centerY, Bool_t optX, Bool_t optY)
+{
+    gr->GetXaxis()->SetNdivisions(ndivx, optX);
+    gr->GetYaxis()->SetNdivisions(ndivy, optY);
+
+    gr->GetXaxis()->SetLabelSize(xls);
+    gr->GetYaxis()->SetLabelSize(yls);
+    gr->GetXaxis()->SetLabelOffset(xlo);
+    gr->GetYaxis()->SetLabelOffset(ylo);
+
+    gr->GetXaxis()->SetTitleSize(xts);
+    gr->GetYaxis()->SetTitleSize(yts);
+    gr->GetXaxis()->SetTitleOffset(xto);
+    gr->GetYaxis()->SetTitleOffset(yto);
+
+    if (centerX) gr->GetXaxis()->CenterTitle(centerX);
+    if (centerY) gr->GetYaxis()->CenterTitle(centerY);
+}
+
+void NiceGraph(TGraph* gr, const GraphFormat& format)
+{
+    format.x.format(gr->GetXaxis());
+    format.y.format(gr->GetYaxis());
+}
+
+}; // namespace RT::Hist
+
+namespace RT::Exports
+{
+
+Bool_t gHasImgExportEnabled = kTRUE;
+Bool_t gImgExportPNG = kTRUE;
+Bool_t gImgExportEPS = kTRUE;
+Bool_t gImgExportPDF = kFALSE;
+
+void ExportPNG(TCanvas* can, const TString& path)
 {
     TASImage img;
     img.FromPad(can);
@@ -107,7 +238,7 @@ void RT::ExportPNG(TCanvas* can, const TString& path)
     img.WriteImage(filename);
 }
 
-void RT::ExportEPS(TCanvas* can, const TString& path)
+void ExportEPS(TCanvas* can, const TString& path)
 {
     Int_t oldLevel = gErrorIgnoreLevel;
     gErrorIgnoreLevel = kWarning;
@@ -117,7 +248,7 @@ void RT::ExportEPS(TCanvas* can, const TString& path)
     gErrorIgnoreLevel = oldLevel;
 }
 
-void RT::ExportPDF(TCanvas* can, const TString& path)
+void ExportPDF(TCanvas* can, const TString& path)
 {
     Int_t oldLevel = gErrorIgnoreLevel;
     gErrorIgnoreLevel = kWarning;
@@ -126,7 +257,7 @@ void RT::ExportPDF(TCanvas* can, const TString& path)
     gErrorIgnoreLevel = oldLevel;
 }
 
-void RT::ExportMacroC(TCanvas* can, const TString& path)
+void ExportMacroC(TCanvas* can, const TString& path)
 {
     Int_t oldLevel = gErrorIgnoreLevel;
     gErrorIgnoreLevel = kWarning;
@@ -135,7 +266,7 @@ void RT::ExportMacroC(TCanvas* can, const TString& path)
     gErrorIgnoreLevel = oldLevel;
 }
 
-void RT::ExportImages(TCanvas* can, const TString& path)
+void ExportImages(TCanvas* can, const TString& path)
 {
     if (!gHasImgExportEnabled) return;
 
@@ -144,7 +275,7 @@ void RT::ExportImages(TCanvas* can, const TString& path)
     if (gImgExportPDF) ExportPDF(can, path);
 }
 
-void RT::SaveAndClose(TCanvas* can, TFile* f, Bool_t export_images, const TString& path)
+void SaveAndClose(TCanvas* can, TFile* f, Bool_t export_images, const TString& path)
 {
     can->Update();
 
@@ -154,6 +285,8 @@ void RT::SaveAndClose(TCanvas* can, TFile* f, Bool_t export_images, const TStrin
 
     can->Close();
 }
+
+} // namespace RT::Exports
 
 // Theta in ptvsRap, von der Chii
 Double_t RT::MtY(Double_t* yP, Double_t* par)
@@ -205,7 +338,8 @@ Double_t RT::Momentum(Double_t* yP, Double_t* par)
     return pt;
 }
 
-void RT::DrawAngleLine(Double_t angle, Double_t xdraw, Double_t ydraw, Double_t angledraw,
+namespace RT::Drawing {
+void DrawAngleLine(Double_t angle, Double_t xdraw, Double_t ydraw, Double_t angledraw,
                        Int_t color, Int_t width, Int_t style)
 {
     static TF1* ThetaFunc = new TF1("ThetaFunc", &RT::MtY, -4, 4, 2);
@@ -229,7 +363,7 @@ void RT::DrawAngleLine(Double_t angle, Double_t xdraw, Double_t ydraw, Double_t 
     delete text;
 }
 
-void RT::DrawMomentumLine(Double_t mom, Double_t xdraw, Double_t ydraw, Double_t angledraw,
+void DrawMomentumLine(Double_t mom, Double_t xdraw, Double_t ydraw, Double_t angledraw,
                           Int_t color, Int_t width, Int_t style)
 {
     static TF1* PFunc = new TF1("PFunc", &RT::Momentum, -4, 4, 2);
@@ -254,7 +388,7 @@ void RT::DrawMomentumLine(Double_t mom, Double_t xdraw, Double_t ydraw, Double_t
     delete text;
 }
 
-void RT::DrawLine(Double_t x1, Double_t y1, Double_t x2, Double_t y2, Int_t color, Int_t width,
+void DrawLine(Double_t x1, Double_t y1, Double_t x2, Double_t y2, Int_t color, Int_t width,
                   Int_t style)
 {
     TLine* line = new TLine;
@@ -264,6 +398,8 @@ void RT::DrawLine(Double_t x1, Double_t y1, Double_t x2, Double_t y2, Int_t colo
 
     line->DrawLine(x1, y1, x2, y2);
 }
+
+};
 
 TPaletteAxis* RT::NicePalette(TH2* h, Float_t ls, Float_t ts, Float_t to)
 {
@@ -292,128 +428,6 @@ TPaletteAxis* RT::NoPalette(TH2* h)
     return 0;
 }
 
-void RT::NicePad(TVirtualPad* pad, Float_t mT, Float_t mR, Float_t mB, Float_t mL)
-{
-    pad->SetTopMargin(mT);
-    pad->SetBottomMargin(mB);
-    pad->SetLeftMargin(mL);
-    pad->SetRightMargin(mR);
-}
-
-void RT::NicePad(TVirtualPad* pad, const PadFormat& format)
-{
-    RT::NicePad(pad, format.marginTop, format.marginRight, format.marginBottom, format.marginLeft);
-}
-
-void RT::NiceHistogram(TH1* h, Int_t ndivx, Int_t ndivy, Float_t xls, Float_t xlo, Float_t xts,
-                       Float_t xto, Float_t yls, Float_t ylo, Float_t yts, Float_t yto,
-                       Bool_t centerX, Bool_t centerY, Bool_t optX, Bool_t optY)
-{
-
-    h->GetXaxis()->SetNdivisions(ndivx, optX);
-    h->GetYaxis()->SetNdivisions(ndivy, optY);
-
-    h->SetStats(0);
-
-    h->SetLabelSize(xls, "X");
-    h->SetLabelSize(yls, "Y");
-    h->SetLabelOffset(xlo, "X");
-    h->SetLabelOffset(ylo, "Y");
-
-    h->SetTitleSize(xts, "X");
-    h->SetTitleSize(yts, "Y");
-    h->SetTitleOffset(xto, "X");
-    h->SetTitleOffset(yto, "Y");
-
-    if (centerX) h->GetXaxis()->CenterTitle(centerX);
-    if (centerY) h->GetYaxis()->CenterTitle(centerY);
-}
-
-void RT::NiceHistogram(TH1* h, const GraphFormat& format)
-{
-    RT::NiceHistogram(h, format.x.Ndiv, format.y.Ndiv, format.x.ls, format.x.lo, format.x.ts,
-                      format.x.to, format.y.ls, format.y.lo, format.y.ts, format.y.to,
-                      format.x.center_label, format.y.center_label, format.x.optimize,
-                      format.y.optimize);
-}
-
-void RT::NiceHistogram(TH2* h, const GraphFormat& format)
-{
-    format.x.format(h->GetXaxis());
-    format.y.format(h->GetYaxis());
-    format.z.format(h->GetZaxis());
-}
-
-void RT::NiceHistogram(TH1* h, const TString& text)
-{
-    TObjArray* arr = text.Tokenize(";");
-
-    size_t arr_len = arr->GetEntries();
-
-    for (uint i = 0; i < arr_len; ++i)
-    {
-        // 		PR(i);
-        TObjArray* entry = ((TObjString*)arr->At(i))->GetString().Tokenize(":=");
-        if (entry->GetEntries() != 2) continue;
-
-        TString key = ((TObjString*)entry->At(0))->GetString();
-        TString val = ((TObjString*)entry->At(1))->GetString();
-        // 		PR(key.Data());
-        // 		PR(val.Data());
-
-        if (key == "lc")
-            h->SetLineColor(val.Atoi());
-        else if (key == "lw")
-            h->SetLineWidth(val.Atoi());
-        else if (key == "lt")
-            h->SetLineStyle(val.Atoi());
-
-        else if (key == "mc")
-            h->SetMarkerColor(val.Atoi());
-        else if (key == "ms")
-            h->SetMarkerSize(val.Atof());
-        else if (key == "mt")
-            h->SetMarkerStyle(val.Atoi());
-
-        else if (key == "fc")
-            h->SetFillColor(val.Atoi());
-        else if (key == "ft")
-            h->SetFillStyle(val.Atoi());
-
-        else if (key == "ho")
-            h->SetOption(val);
-
-        else
-            printf(" - Unknow arguments %s = %s, skipping them...\n", key.Data(), val.Data());
-    }
-}
-
-void RT::NiceGraph(TGraph* gr, Int_t ndivx, Int_t ndivy, Float_t xls, Float_t xlo, Float_t xts,
-                   Float_t xto, Float_t yls, Float_t ylo, Float_t yts, Float_t yto, Bool_t centerX,
-                   Bool_t centerY, Bool_t optX, Bool_t optY)
-{
-    gr->GetXaxis()->SetNdivisions(ndivx, optX);
-    gr->GetYaxis()->SetNdivisions(ndivy, optY);
-
-    gr->GetXaxis()->SetLabelSize(xls);
-    gr->GetYaxis()->SetLabelSize(yls);
-    gr->GetXaxis()->SetLabelOffset(xlo);
-    gr->GetYaxis()->SetLabelOffset(ylo);
-
-    gr->GetXaxis()->SetTitleSize(xts);
-    gr->GetYaxis()->SetTitleSize(yts);
-    gr->GetXaxis()->SetTitleOffset(xto);
-    gr->GetYaxis()->SetTitleOffset(yto);
-
-    if (centerX) gr->GetXaxis()->CenterTitle(centerX);
-    if (centerY) gr->GetYaxis()->CenterTitle(centerY);
-}
-
-void RT::NiceGraph(TGraph* gr, const GraphFormat& format)
-{
-    format.x.format(gr->GetXaxis());
-    format.y.format(gr->GetYaxis());
-}
 
 void RT::AutoScale(TH1* hdraw, TH1* href, Bool_t MinOnZero)
 {
